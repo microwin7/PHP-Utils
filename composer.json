@@ -1,0 +1,25 @@
+{
+    "name": "microwin7/php-utils",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": "^7.4.27",
+        "thedudeguy/rcon": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "Microwin7\\PHPUtils\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "microwin7",
+            "email": "usa.microwin8@gmail.com"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/microwin7/PHPUtil/issues",
+        "source": "https://github.com/microwin7/PHPUtil/tree/master"
+    },
+    "minimum-stability": "dev"
+}

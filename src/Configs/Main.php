@@ -144,12 +144,12 @@ class Main
             return $server_name = array_key_first(self::SERVERS);
         }
     }
-	public static function getPublicKeyFromBase64()
-	{
-		return "-----BEGIN PUBLIC KEY-----\n" . chunk_split(self::ECDSA256_PUBLIC_KEY_BASE64, 64, "\n") . "-----END PUBLIC KEY-----";
-	}
+    public static function getPublicKeyFromBase64()
+    {
+        return "-----BEGIN PUBLIC KEY-----\n" . chunk_split(self::ECDSA256_PUBLIC_KEY_BASE64, 64, "\n") . "-----END PUBLIC KEY-----";
+    }
     public static function getPublicKeyFromBytes()
-	{
-		return "-----BEGIN PUBLIC KEY-----\n" . chunk_split(base64_encode(file_get_contents(self::ECDSA256_PUBLIC_KEY_PATH)), 64, "\n") . "-----END PUBLIC KEY-----";
-	}
+    {
+        return "-----BEGIN PUBLIC KEY-----\n" . chunk_split(base64_encode(file_get_contents(self::ECDSA256_PUBLIC_KEY_PATH)), 64, "\n") . "-----END PUBLIC KEY-----";
+    }
 }

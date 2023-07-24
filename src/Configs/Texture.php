@@ -2,8 +2,8 @@
 
 namespace Microwin7\PHPUtils\Configs;
 
-use microwin7\Exceptions\TextureSizeException;
-use microwin7\Exceptions\TextureSizeHDException;
+use \Microwin7\PHPUtils\Exceptions\TextureSizeException;
+use \Microwin7\PHPUtils\Exceptions\TextureSizeHDException;
 
 class Texture
 {

@@ -41,7 +41,7 @@ class Rcon
     }
     public function teleportToSpawn(string $username): void
     {
-        if(empty($username)) throw new RequiredArgumentMissingException;
+        if (empty($username)) throw new RequiredArgumentMissingException;
         $this->sendRconCommand('otp', $username);
     }
     public function broadcast(string $command): array

@@ -131,5 +131,4 @@ class DBDriverMySQLi
 	{
 		return $this->insert_id;
 	}
-
 }

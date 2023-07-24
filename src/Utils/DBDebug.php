@@ -7,7 +7,6 @@ use \Microwin7\PHPUtils\Configs\Path;
 
 class DBDebug
 {
-
 	private function file_put_contents($path, $message)
 	{
 		$directory = Path::DB_LOG_FOLDER;

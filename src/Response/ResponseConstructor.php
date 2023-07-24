@@ -1,6 +1,6 @@
 <?php
 
-namespace Microwin7\PHPUtils\Utils;
+namespace Microwin7\PHPUtils\Response;
 
 class ResponseConstructor
 {

@@ -16,6 +16,7 @@ class MainConfig
     public const DB_PREFIX = 'server_';
     // Запись в файлы лога SQL запросов и их ошибок
     public const DEBUG = true;
+    public const BEARER_TOKEN = '';
     public const PRIVATE_API_KEY = '';
     // https://base64.guru/converter/encode/file
     protected const ECDSA256_PUBLIC_KEY_BASE64 = 'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEJDi51DKs5f6ERSrDDjns00BkI963L9OS9wLA2Ak/nACZCgQma+FsTsbYtZQm4nk+rtabM8b9JgzSi3sPINb8fg==';

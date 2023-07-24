@@ -1,10 +1,11 @@
 <?php
 
-namespace Microwin7\PHPUtils\Utils;
+namespace Microwin7\PHPUtils\DB;
 
 use Microwin7\PHPUtils\Main;
+use Microwin7\PHPUtils\Utils\Debug;
 
-class DBDriverPDO
+class DriverPDO
 {
     private \PDO $DBH;
     private string $DSN;

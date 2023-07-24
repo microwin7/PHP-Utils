@@ -1,11 +1,11 @@
 <?php
 
-namespace Microwin7\PHPUtils\Utils;
+namespace Microwin7\PHPUtils\DB;
 
 use Microwin7\PHPUtils\Main;
 use Microwin7\PHPUtils\Exceptions\ServerNotFoundException;
 
-class DBConnector
+class Connector
 {
     protected $database = [];
 
@@ -35,9 +35,9 @@ class DBConnector
         if (array_key_exists($database, $this->database)) return $this->database[$database];
         switch (strtolower(Main::DB_DRIVER)) {
             case 'pdo':
-                return $this->database[$database] = new DBDriverPDO($database, $module['prefix'] ?? '');
+                return $this->database[$database] = new DriverPDO($database, $module['prefix'] ?? '');
             default:
-                return $this->database[$database] = new DBDriverMySQLi($database, $module['prefix'] ?? '');
+                return $this->database[$database] = new DriverMySQLi($database, $module['prefix'] ?? '');
         }
     }
 }

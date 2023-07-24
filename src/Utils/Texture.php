@@ -1,23 +1,21 @@
 <?php
 
-namespace Microwin7\PHPUtils\Configs;
+namespace Microwin7\PHPUtils\Utils;
 
-use \Microwin7\PHPUtils\Exceptions\TextureSizeException;
-use \Microwin7\PHPUtils\Exceptions\TextureSizeHDException;
+use Microwin7\PHPUtils\Configs\MainConfig;
+use Microwin7\PHPUtils\Exceptions\TextureSizeException;
+use Microwin7\PHPUtils\Exceptions\TextureSizeHDException;
 
-class Texture
+class Texture extends MainConfig
 {
-    private const TEXTURE_PATH = [
-        'skin' => __DIR__ . '/skins/',
-        'cape' => __DIR__ . '/capes/'
-    ];
-    private const SKIN_PATCH = self::TEXTURE_PATH['skin'] . '{LOGIN}.png';
-    private const CAPE_PATCH = self::TEXTURE_PATH['cape'] . '{LOGIN}.png';
-    private const SIZE = [
+
+    private const SKIN_PATCH = parent::TEXTURE_PATH['skin'] . '{LOGIN}.png';
+    private const CAPE_PATCH = parent::TEXTURE_PATH['cape'] . '{LOGIN}.png';
+    public const SIZE = [
         'skin' => [['w' => 64, 'h' => 64], ['w' => 64, 'h' => 32]],
         'cape' => [['w' => 64, 'h' => 32]]
     ];
-    private const SIZE_HD = [
+    public const SIZE_WITH_HD = [
         'skin' => [
             ['w' => 64, 'h' => 64], ['w' => 64, 'h' => 32],
             ['w' => 128, 'h' => 64], ['w' => 128, 'h' => 128],
@@ -34,15 +32,15 @@ class Texture
 
     public static function getSkinPath()
     {
-        return self::TEXTURE_PATH['skin'];
+        return parent::TEXTURE_PATH['skin'];
     }
     public static function getCapePath()
     {
-        return self::TEXTURE_PATH['cape'];
+        return parent::TEXTURE_PATH['cape'];
     }
     public static function getTexturePath($type)
     {
-        return self::TEXTURE_PATH[$type];
+        return parent::TEXTURE_PATH[$type];
     }
     public static function getSkinUrl($username)
     {
@@ -65,7 +63,7 @@ class Texture
     public static function validateToHDSize($width, $height, $type)
     {
         $valid_size = false;
-        foreach (self::SIZE_HD[$type] as $key => $value) {
+        foreach (self::SIZE_WITH_HD[$type] as $key => $value) {
             if ($value['w'] == $width && $value['h'] == $height) {
                 $valid_size = true;
             }

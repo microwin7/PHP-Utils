@@ -2,7 +2,7 @@
 
 namespace Microwin7\PHPUtils\Utils;
 
-use \Microwin7\PHPUtils\Configs\Main;
+use Microwin7\PHPUtils\Main;
 
 class DBDriverPDO
 {
@@ -13,13 +13,13 @@ class DBDriverPDO
     private $table_prefix;
     private $insert_id;
     private $database;
-    private DBDebug $debug;
+    private Debug $debug;
 
     public function __construct($database = Main::DB_NAME, $table_prefix = '')
     {
         $this->table_prefix = $table_prefix;
         $this->database = $database;
-        $this->debug = new DBDebug;
+        $this->debug = new Debug;
         $this->generateDSN();
         try {
             $this->DBH = new \PDO($this->DSN, Main::DB_USER, Main::DB_PASS, [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION, \PDO::ATTR_PERSISTENT => true]);

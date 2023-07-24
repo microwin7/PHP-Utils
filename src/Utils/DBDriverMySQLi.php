@@ -2,7 +2,7 @@
 
 namespace Microwin7\PHPUtils\Utils;
 
-use \Microwin7\PHPUtils\Configs\Main;
+use Microwin7\PHPUtils\Main;
 
 class DBDriverMySQLi
 {
@@ -12,13 +12,13 @@ class DBDriverMySQLi
 	private $table_prefix;
 	private $insert_id;
 	private $database;
-	private DBDebug $debug;
+	private Debug $debug;
 
 	public function __construct($database = Main::DB_NAME, $table_prefix = '')
 	{
 		$this->table_prefix = $table_prefix;
 		$this->database = $database;
-		$this->debug = new DBDebug;
+		$this->debug = new Debug;
 		$this->mysqli = new \mysqli(Main::DB_HOST, Main::DB_USER, Main::DB_PASS, $database, Main::DB_PORT);
 		if ($this->mysqli->connect_errno) $this->debug->debug("Connect error: {$this->mysqli->connect_error}");
 		$this->mysqli->set_charset("utf8");

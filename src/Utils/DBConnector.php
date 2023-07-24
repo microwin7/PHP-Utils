@@ -2,8 +2,8 @@
 
 namespace Microwin7\PHPUtils\Utils;
 
-use \Microwin7\PHPUtils\Configs\Main;
-use \Microwin7\PHPUtils\Exceptions\ServerNotFound;
+use Microwin7\PHPUtils\Main;
+use Microwin7\PHPUtils\Exceptions\ServerNotFoundException;
 
 class DBConnector
 {
@@ -21,7 +21,7 @@ class DBConnector
         else {
             try {
                 $database = strtolower(Main::DB_PREFIX . Main::getServerWithoutDefault($database));
-            } catch (ServerNotFound $e) {
+            } catch (ServerNotFoundException $e) {
                 $modules_keys_lower_case = array_change_key_case(Main::MODULES);
                 $key_exists = array_key_exists(strtolower($database), $modules_keys_lower_case);
                 if ($key_exists === true) {

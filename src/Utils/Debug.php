@@ -2,10 +2,10 @@
 
 namespace Microwin7\PHPUtils\Utils;
 
-use \Microwin7\PHPUtils\Configs\Main;
-use \Microwin7\PHPUtils\Configs\Path;
+use Microwin7\PHPUtils\Main;
+use Microwin7\PHPUtils\Configs\Path;
 
-class DBDebug
+class Debug
 {
 	private function file_put_contents($path, $message)
 	{
@@ -25,5 +25,8 @@ class DBDebug
 	public function debug_error($message)
 	{
 		if (Main::DEBUG) $this->file_put_contents(__FUNCTION__, $message);
+	}
+	public function debug_extra($message, $folder= 'extra'){
+		if (Main::DEBUG) $this->file_put_contents($folder, $message);
 	}
 }

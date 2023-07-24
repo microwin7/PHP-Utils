@@ -1,8 +1,8 @@
 <?php
 
-namespace Microwin7\PHPUtils\Configs;
+namespace Microwin7\PHPUtils\Rules;
 
-class RegexRules
+class Regex
 {
     public const DISALLOW_FIRST_SPACE = '/^\s/';
     public const DISALLOW_LAST_SPACE = '/\s$/';

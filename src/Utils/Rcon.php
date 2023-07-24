@@ -2,11 +2,11 @@
 
 namespace Microwin7\PHPUtils\Utils;
 
-use \Microwin7\PHPUtils\Configs\Main;
-use \Microwin7\PHPUtils\Exceptions\RconConnectException;
-use \Microwin7\PHPUtils\Exceptions\RequiredArgumentMissingException;
-use \Microwin7\PHPUtils\Exceptions\SolutionDisabledException;
-use \Microwin7\PHPUtils\Exceptions\ServerNotSelected;
+use Microwin7\PHPUtils\Main;
+use Microwin7\PHPUtils\Exceptions\RconConnectException;
+use Microwin7\PHPUtils\Exceptions\RequiredArgumentMissingException;
+use Microwin7\PHPUtils\Exceptions\SolutionDisabledException;
+use Microwin7\PHPUtils\Exceptions\ServerNotSelected;
 
 class Rcon
 {

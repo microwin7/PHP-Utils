@@ -2,6 +2,8 @@
 
 namespace Microwin7\PHPUtils\Utils;
 
+use Microwin7\PHPUtils\Response\Response;
+
 class Regex
 {
     private $data;

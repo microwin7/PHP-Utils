@@ -54,16 +54,4 @@ class MainConfig
             'prefix' => 'litebans_',
         ],
     ];
-
-    // Path
-    public const ROOT_FOLDER = '/var/www/html/';
-    public const DB_LOG_FOLDER = '/var/www/db_logs/';
-    public const SITE_TEMPLATES_FOLDER = 'templates/имя_шаблона/';
-
-    // Texture
-    protected const TEXTURE_PATH = [
-        'skin' => self::ROOT_FOLDER . 'skins/',
-        'cape' => self::ROOT_FOLDER . 'capes/'
-    ];
-    protected const MAX_SIZE_BYTES = 2 * 1024 * 1024; // byte => Kbyte, Kbyte => MB * 2
 }

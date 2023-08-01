@@ -2,7 +2,7 @@
 
 namespace Microwin7\PHPUtils\Security;
 
-use Microwin7\PHPUtils\Main;
+use Microwin7\PHPUtils\Configs\MainConfig;
 
 class BearerToken
 {
@@ -12,6 +12,6 @@ class BearerToken
     }
     public static function validationBearer(): bool
     {
-        return self::getBearer() === Main::BEARER_TOKEN;
+        return self::getBearer() === MainConfig::BEARER_TOKEN;
     }
 }

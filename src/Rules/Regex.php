@@ -12,5 +12,20 @@ class Regex
     public const CATEGORY_REGXP = '/^([A-Z0-9\_]+)*$/';
     public const ITEM_LINK_REGXP = '/^([a-zA-Z0-9\_\-\.]+)*$/';
     public const SERVER_REGXP = '/^([a-zA-Z]+)*$/';
-    public const REGEX_UUIDv1_AND_v4 = "/[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}/";
+    public const USERNAME = "\w{1,16}$";
+    public const UUID_NO_DASH = "[0-9a-f]{32}";
+    public const UUIDv1_AND_v4 = "/[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}/";
+
+    public static function valid_username(string $string): bool
+    {
+        return (!is_null($string) && (preg_match("/^" . self::USERNAME . "/", $string, $varR)));
+    }
+    public static function valid_uuid_no_dash(string $string): bool
+    {
+        return (!is_null($string) && preg_match("/" . self::UUID_NO_DASH . "/", str_replace('-', '', $string), $varR));
+    }
+    public static function contains(string $haystack, string $needle)
+    {
+        return strpos($haystack, $needle) !== false;
+    }
 }

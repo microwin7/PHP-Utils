@@ -1,9 +1,9 @@
 {
     "name": "microwin7/php-utils",
     "type": "library",
-    "license": "MIT",
+    "license": "GPL-3.0-or-later",
     "require": {
-        "php": "^7.4.27|^8.0",
+        "php": "^7.4|^8.0",
         "microwin7/rcon": "^1.1"
     },
     "autoload": {
@@ -21,5 +21,5 @@
         "issues": "https://github.com/microwin7/PHPUtil/issues",
         "source": "https://github.com/microwin7/PHPUtil/tree/master"
     },
-    "minimum-stability": "dev"
+    "minimum-stability": "stable"
 }

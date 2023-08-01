@@ -2,6 +2,7 @@
 
 namespace Microwin7\PHPUtils\Utils;
 
+use Microwin7\PHPUtils\Configs\MainConfig;
 use Microwin7\PHPUtils\Main;
 use Microwin7\PHPUtils\Exceptions\RconConnectException;
 use Microwin7\PHPUtils\Exceptions\RequiredArgumentMissingException;
@@ -22,10 +23,10 @@ class Rcon
         $this->checkEmptyServer();
         if ($check_correct_server) $this->checkServer();
         $rcon = new \Thedudeguy\Rcon(
-            Main::SERVERS[$this->server]['host'],
-            Main::SERVERS[$this->server]['port'],
-            Main::SERVERS[$this->server]['rcon']['password'],
-            Main::SERVERS[$this->server]['rcon']['timeout'],
+            MainConfig::SERVERS[$this->server]['host'],
+            MainConfig::SERVERS[$this->server]['port'],
+            MainConfig::SERVERS[$this->server]['rcon']['password'],
+            MainConfig::SERVERS[$this->server]['rcon']['timeout'],
         );
         if (!$rcon->connect()) throw new RconConnectException;
         $rcon->sendCommand($command . ' ' . $username);
@@ -37,7 +38,7 @@ class Rcon
     }
     private function checkServer()
     {
-        if (!@Main::SERVERS[Main::getCorrectServer($this->server)]['rcon']['enable']) throw new SolutionDisabledException;
+        if (!@MainConfig::SERVERS[Main::getCorrectServer($this->server)]['rcon']['enable']) throw new SolutionDisabledException;
     }
     public function teleportToSpawn(string $username): void
     {
@@ -47,7 +48,7 @@ class Rcon
     public function broadcast(string $command): array
     {
         $deny_servers = [];
-        foreach (Main::SERVERS as $server => $value) {
+        foreach (MainConfig::SERVERS as $server => $value) {
             if (!@$value['rcon']['enable']) continue;
             $this->server = $server;
             try {

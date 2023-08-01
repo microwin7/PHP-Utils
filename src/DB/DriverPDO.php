@@ -2,7 +2,7 @@
 
 namespace Microwin7\PHPUtils\DB;
 
-use Microwin7\PHPUtils\Main;
+use Microwin7\PHPUtils\Configs\MainConfig;
 use Microwin7\PHPUtils\Utils\Debug;
 
 class DriverPDO
@@ -16,14 +16,14 @@ class DriverPDO
     private $database;
     private Debug $debug;
 
-    public function __construct($database = Main::DB_NAME, $table_prefix = '')
+    public function __construct($database = MainConfig::DB_NAME, $table_prefix = '')
     {
         $this->table_prefix = $table_prefix;
         $this->database = $database;
         $this->debug = new Debug;
         $this->generateDSN();
         try {
-            $this->DBH = new \PDO($this->DSN, Main::DB_USER, Main::DB_PASS, [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION, \PDO::ATTR_PERSISTENT => true]);
+            $this->DBH = new \PDO($this->DSN, MainConfig::DB_USER, MainConfig::DB_PASS, [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION, \PDO::ATTR_PERSISTENT => true]);
             $this->preConnectionExec();
         } catch (\PDOException $e) {
             $this->debug->debug_error("[{$this->database}] Connection ERROR: [CODE: " . $e->errorInfo[1]  . " | MESSAGE: " . $e->errorInfo[2] . " ]");
@@ -32,17 +32,17 @@ class DriverPDO
     }
     private function generateDSN()
     {
-        switch (strtolower(Main::DB_SUD_DB)) {
+        switch (strtolower(MainConfig::DB_SUD_DB)) {
             case 'pgsql':
-                $this->DSN = "pgsql:host=" . Main::DB_HOST . ";port=" . Main::DB_PORT . ";dbname=" . $this->database;
+                $this->DSN = "pgsql:host=" . MainConfig::DB_HOST . ";port=" . MainConfig::DB_PORT . ";dbname=" . $this->database;
                 break;
             default:
-                $this->DSN = "mysql:host=" . Main::DB_HOST . ";port=" . Main::DB_PORT . ";dbname=" . $this->database . ";charset=utf8mb4";
+                $this->DSN = "mysql:host=" . MainConfig::DB_HOST . ";port=" . MainConfig::DB_PORT . ";dbname=" . $this->database . ";charset=utf8mb4";
         }
     }
     private function preConnectionExec()
     {
-        switch (strtolower(Main::DB_SUD_DB)) {
+        switch (strtolower(MainConfig::DB_SUD_DB)) {
             case 'pgsql':
                 break;
             case 'mysql':

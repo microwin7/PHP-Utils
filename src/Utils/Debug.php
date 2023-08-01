@@ -3,13 +3,13 @@
 namespace Microwin7\PHPUtils\Utils;
 
 use Microwin7\PHPUtils\Main;
-use Microwin7\PHPUtils\Configs\Path;
+use Microwin7\PHPUtils\Configs\PathConfig;
 
 class Debug
 {
 	private function file_put_contents($path, $message)
 	{
-		$directory = Path::DB_LOG_FOLDER;
+		$directory = PathConfig::DB_LOG_FOLDER;
 		if (defined('DB_MODULE_NAME')) {
 			if (defined('DB_MODULE_COMPONENT_NAME')) $directory .= constant('DB_MODULE_NAME') . '/' . constant('DB_MODULE_COMPONENT_NAME') . '/';
 			else $directory .= constant('DB_MODULE_NAME') . '/';

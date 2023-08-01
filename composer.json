@@ -4,6 +4,14 @@
     "license": "GPL-3.0-or-later",
     "require": {
         "php": "^7.4|^8.0",
+        "ext-gd": "*",
+        "ext-mbstring": "*",
+        "ext-pdo": "*",
+        "ext-pdo_pgsql": "*",
+        "ext-pdo_mysql": "*",
+        "ext-pgsql": "*",
+        "ext-mysqli": "*",
+        "ext-json": "*",
         "microwin7/rcon": "^1.1"
     },
     "autoload": {

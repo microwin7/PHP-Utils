@@ -39,7 +39,7 @@ class Texture
         if (!$valid_size) throw new TextureSizeException;
         return $valid_size;
     }
-    public static function validateToHDSize($width, $height, $type)
+    public static function validateHDSize($width, $height, $type)
     {
         $valid_size = false;
         foreach (TextureConfig::SIZE_WITH_HD[$type] as $key => $value) {

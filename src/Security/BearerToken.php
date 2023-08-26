@@ -8,7 +8,7 @@ class BearerToken
 {
     public static function getBearer(): string
     {
-        return substr(@array_change_key_case(getallheaders())['authorization'], 7) ?? '';
+        return substr(@array_change_key_case(getallheaders())['authorization']  ?? '', 7) ?? ''; // в конце нужно до 8.0, после возвращается ""
     }
     public static function validationBearer(): bool
     {

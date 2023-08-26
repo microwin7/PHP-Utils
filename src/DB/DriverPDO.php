@@ -100,7 +100,7 @@ class DriverPDO
                             $this->STH->bindValue($param_id, $arr[$param_id - 1], \PDO::PARAM_STR_CHAR);
                             break;
                         default:
-                            $var_type = \PDO::PARAM_STR;
+                            $this->STH->bindValue($param_id, $arr[$param_id - 1], \PDO::PARAM_STR);
                     }
                     $param_id++;
                 }

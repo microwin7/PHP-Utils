@@ -2,8 +2,6 @@
 
 namespace Microwin7\PHPUtils\Request;
 
-use Microwin7\PHPUtils\Configs\PathConfig;
-
 class Data
 {
     public static function getData()
@@ -13,10 +11,6 @@ class Data
     public static function requiredUrl(): string
     {
         return $_SERVER['QUERY_STRING'];
-    }
-    public static function getPhpSelf()
-    {
-        return str_replace(PathConfig::ROOT_FOLDER, PathConfig::REAL_ROOT_FOLDER, $_SERVER['PHP_SELF']);
     }
     public static function getDataFromUrl($url)
     {

@@ -4,27 +4,48 @@ namespace Microwin7\PHPUtils\Configs;
 
 class TextureConfig
 {
-    // Texture
+    /**
+     * Настройка полного пути хранения файлов
+     * Пример при склеивании: /var/www/html/storage/skins/
+     * Если DIRECTORY_SEPARATOR не будет обнаружен в конце, он будет добавлен принудительно
+     */
+    public const SKIN_PATH = PathConfig::ROOT_FOLDER . self::SKIN_URL_PATH;
+    public const CAPE_PATH = PathConfig::ROOT_FOLDER . self::CAPE_URL_PATH;
+    /**
+     * Внешние пути хранения файлов, от корня сайта
+     */
+    public const SKIN_URL_PATH = 'storage/skins/';
+    public const CAPE_URL_PATH = 'storage/capes/';
+    /**
+     * Для вызова, сохранения, проверок
+     * Может быть пустой строкой, для таких файлов как хеш сумма
+     * Точка будет добавлена автоматически
+     */
+    public const EXT = 'png';
+    /**
+     * Обвязка для получения по ключу, не менять!!!
+     */
     public const TEXTURE_PATH = [
-        'skin' => PathConfig::ROOT_FOLDER . 'skins/',
-        'cape' => PathConfig::ROOT_FOLDER . 'capes/'
+        'SKIN' => self::SKIN_PATH,
+        'CAPE' => self::CAPE_PATH,
     ];
-    public const SKIN_PATCH = self::TEXTURE_PATH['skin'] . '{LOGIN}.png';
-    public const CAPE_PATCH = self::TEXTURE_PATH['cape'] . '{LOGIN}.png';
+    /**
+     * Максимальный размер загружаемого файла
+     */
     public const MAX_SIZE_BYTES = 2 * 1024 * 1024; // byte => Kbyte, Kbyte => MB * 2
 
     public const SIZE = [
-        'skin' => [['w' => 64, 'h' => 64], ['w' => 64, 'h' => 32]],
-        'cape' => [['w' => 64, 'h' => 32]]
+        'SKIN' => [['w' => 64, 'h' => 64], ['w' => 64, 'h' => 32]],
+        'CAPE' => [['w' => 64, 'h' => 32]]
     ];
     public const SIZE_WITH_HD = [
-        'skin' => [
+        'SKIN' => [
             ['w' => 128, 'h' => 64], ['w' => 128, 'h' => 128],
             ['w' => 256, 'h' => 128], ['w' => 256, 'h' => 256],
             ['w' => 512, 'h' => 256], ['w' => 512, 'h' => 512],
             ['w' => 1024, 'h' => 512], ['w' => 1024, 'h' => 1024]
         ],
-        'cape' => [
+        'CAPE' => [
             ['w' => 128, 'h' => 64], ['w' => 256, 'h' => 128],
             ['w' => 512, 'h' => 256], ['w' => 1024, 'h' => 512]
         ]

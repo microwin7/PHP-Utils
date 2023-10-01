@@ -3,7 +3,7 @@
     "type": "library",
     "license": "GPL-3.0-or-later",
     "require": {
-        "php": "^7.4|^8.0",
+        "php": "^7.4||^8.0",
         "ext-gd": "*",
         "ext-mbstring": "*",
         "ext-pdo": "*",
@@ -17,7 +17,11 @@
     "autoload": {
         "psr-4": {
             "Microwin7\\PHPUtils\\": "src/"
-        }
+        },
+        "files": [
+            "src/anonymous_functions.php",
+            "src/functions.php"
+        ]
     },
     "authors": [
         {

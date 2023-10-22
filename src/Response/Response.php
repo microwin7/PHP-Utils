@@ -2,6 +2,8 @@
 
 namespace Microwin7\PHPUtils\Response;
 
+use stdClass;
+
 class Response
 {
     private static array $data = [];
@@ -44,11 +46,11 @@ class Response
     }
     public static function json_encode(mixed $data = null): string
     {
-        return json_encode((object)null === $data ?: self::$data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION);
+        return json_encode(null !== $data ? $data : (!empty(self::$data) ? self::$data : new stdClass), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION);
     }
     public static function response(mixed $data = null)
     {
         self::header();
-        die(self::json_encode((object)null === $data ?: self::$data));
+        die(self::json_encode(null !== $data ? $data : (!empty(self::$data) ? self::$data : new stdClass)));
     }
 }

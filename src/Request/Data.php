@@ -12,7 +12,7 @@ class Data
     {
         return $_SERVER['QUERY_STRING'];
     }
-    public static function getDataFromUrl($url)
+    public static function getDataFromUrl($url): string|false
     {
         $data = file_get_contents($url, false, stream_context_create(['http' => ['ignore_errors' => true]]));
         $headers = self::parseHeaders($http_response_header);

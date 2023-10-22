@@ -10,7 +10,7 @@ class Connector
 {
     protected $database = [];
 
-    public function __get($database)
+    public function __get($database): DriverPDO|DriverMySQLi
     {
         if (array_key_exists($database, $this->database)) return $this->database[$database];
         return $this->getConnect($database);

@@ -3,7 +3,7 @@
     "type": "library",
     "license": "GPL-3.0-or-later",
     "require": {
-        "php": "^7.4||^8.0",
+        "php": "^8.2",
         "ext-gd": "*",
         "ext-mbstring": "*",
         "ext-pdo": "*",

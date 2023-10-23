@@ -12,7 +12,7 @@ class Regex
     public const CATEGORY_REGXP = '/^[A-Z0-9\_]+$/';
     public const ITEM_LINK_REGXP = '/^[a-zA-Z0-9\_\-\.]+$/';
     public const SERVER_REGXP = '/^([a-zA-Z]+)*$/';
-    public const LOGIN = "/^[a-zA-Z0-9_-]{2,64}$/";
+    public const LOGIN = "/^[a-zA-Z0-9_-]{1,64}$/";
     public const USERNAME = "/^\w{2,16}$/";
     public const UUID_NO_DASH = "/^[0-9a-f]{32}/";
     public const UUIDv1_AND_v4 = "/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}/";

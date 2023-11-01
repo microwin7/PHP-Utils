@@ -20,7 +20,7 @@ class Response
     {
         self::$data['code'] = $code;
     }
-    public function code_response(int $code): void
+    public static function code_response(int $code): void
     {
         http_response_code($code);
     }

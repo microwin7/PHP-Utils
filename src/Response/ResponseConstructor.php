@@ -4,9 +4,12 @@ namespace Microwin7\PHPUtils\Response;
 
 class ResponseConstructor
 {
+    private $data = [];
+
     public function __construct(
-        private mixed $data = []
+        $data = []
     ) {
+        $this->data = $data;
     }
     public function message(string $message): object
     {
@@ -20,6 +23,11 @@ class ResponseConstructor
     }
     public function code(int $code): object
     {
+        $this->data['code'] = $code;
+        return $this;
+    }
+    public function code_response(int $code): object
+    {
         http_response_code($code);
         return $this;
     }
@@ -30,18 +38,18 @@ class ResponseConstructor
         }
         return $this;
     }
-    public function success(?string $message = null): void
+    public function success(?string $message = null, bool $need_success = false): void
     {
         null === $message ?: $this->message($message);
-        $this->data['success'] = true;
+        $need_success ?: $this->data['success'] = true;
         $this->response();
     }
-    public function failed(?string $message = null, ?string $error = null, ?int $code = null): void
+    public function failed(?string $message = null, ?string $error = null, bool $need_success = false, int $code = 400): void
     {
         null === $message ?: $this->message($message);
         null === $error ?: $this->error($error);
-        null === $code ?: $this->code($code);
-        $this->data['success'] = false;
+        $need_success ?: $this->data['success'] = false;
+        $this->code_response($code);
         $this->response();
     }
     private function json_encode()

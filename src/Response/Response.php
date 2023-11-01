@@ -16,9 +16,13 @@ class Response
     {
         self::$data['error'] = $error;
     }
-    public static function code(int $error): void
+    public static function code(int $code): void
     {
-        http_response_code($error);
+        self::$data['code'] = $code;
+    }
+    public function code_response(int $code): void
+    {
+        http_response_code($code);
     }
     public static function extra(array $array)
     {
@@ -26,18 +30,18 @@ class Response
             self::$data[$k] = $v;
         }
     }
-    public static function success(?string $message = null): void
+    public static function success(?string $message = null, bool $need_success = false): void
     {
         null === $message ?: self::message($message);
-        self::$data['success'] = true;
+        $need_success ?: self::$data['success'] = true;
         self::response();
     }
-    public static function failed(?string $message = null, ?string $error = null, ?int $code = null): void
+    public static function failed(?string $message = null, ?string $error = null, bool $need_success = false, int $code = 400): void
     {
         null === $message ?: self::message($message);
         null === $error ?: self::error($error);
-        null === $code ?: self::code($code);
-        self::$data['success'] = false;
+        $need_success ?: self::$data['success'] = false;
+        self::code_response($code);
         self::response();
     }
     private static function header(): void

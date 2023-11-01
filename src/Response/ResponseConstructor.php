@@ -26,9 +26,9 @@ class ResponseConstructor
         $this->data['code'] = $code;
         return $this;
     }
-    public function code_response(int $code): object
+    public function code_response(int $code_response): object
     {
-        http_response_code($code);
+        http_response_code($code_response);
         return $this;
     }
     public function extra(array $array): object
@@ -44,12 +44,13 @@ class ResponseConstructor
         !$need_success ?: $this->data['success'] = true;
         $this->response();
     }
-    public function failed(?string $message = null, ?string $error = null, bool $need_success = false, int $code = 400): void
+    public function failed(?string $message = null, ?string $error = null, bool $need_success = false, int $code = 0, int $code_response = 400): void
     {
         null === $message ?: $this->message($message);
         null === $error ?: $this->error($error);
         !$need_success ?: $this->data['success'] = false;
-        $this->code_response($code);
+        0 === $code ?: $this->code($code);
+        $this->code_response($code_response);
         $this->response();
     }
     private function json_encode()

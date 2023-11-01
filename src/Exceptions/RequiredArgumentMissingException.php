@@ -6,6 +6,8 @@ class RequiredArgumentMissingException extends \Exception
 {
     function __construct(string|array $arguments = 'ENCRYPTED')
     {
-        parent::__construct("Отсутствуют обязательные аргументы: " . is_array($arguments) ? implode(', ', $arguments) : $arguments);
+        if (is_array($arguments))
+            parent::__construct("Отсутствуют обязательные аргументы: " . implode(', ', $arguments));
+        else parent::__construct("Отсутствует обязательный аргумент: " . $arguments);
     }
 }

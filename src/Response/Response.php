@@ -33,14 +33,14 @@ class Response
     public static function success(?string $message = null, bool $need_success = false): void
     {
         null === $message ?: self::message($message);
-        $need_success ?: self::$data['success'] = true;
+        !$need_success ?: self::$data['success'] = true;
         self::response();
     }
     public static function failed(?string $message = null, ?string $error = null, bool $need_success = false, int $code = 400): void
     {
         null === $message ?: self::message($message);
         null === $error ?: self::error($error);
-        $need_success ?: self::$data['success'] = false;
+        !$need_success ?: self::$data['success'] = false;
         self::code_response($code);
         self::response();
     }

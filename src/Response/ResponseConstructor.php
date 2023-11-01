@@ -41,14 +41,14 @@ class ResponseConstructor
     public function success(?string $message = null, bool $need_success = false): void
     {
         null === $message ?: $this->message($message);
-        $need_success ?: $this->data['success'] = true;
+        !$need_success ?: $this->data['success'] = true;
         $this->response();
     }
     public function failed(?string $message = null, ?string $error = null, bool $need_success = false, int $code = 400): void
     {
         null === $message ?: $this->message($message);
         null === $error ?: $this->error($error);
-        $need_success ?: $this->data['success'] = false;
+        !$need_success ?: $this->data['success'] = false;
         $this->code_response($code);
         $this->response();
     }

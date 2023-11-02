@@ -16,7 +16,7 @@ class RequiredArguments
     }
     public static function validate(array $requiredArguments, ?array $where): static
     {
-        if ((!empty($requiredArguments) && !empty($where)) && count($requiredArguments) >= count($where)) {
+        if ((!empty($requiredArguments) && !empty($where)) && count($requiredArguments) <= count($where)) {
             $class = new static();
             foreach ($requiredArguments as $argument) {
                 $class->with($argument, $where[$argument] ?? new RequiredArgumentMissingException($requiredArguments));

@@ -21,6 +21,8 @@ class MainConfig
     // https://base64.guru/converter/encode/file
     protected const ECDSA256_PUBLIC_KEY_BASE64 = 'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEJDi51DKs5f6ERSrDDjns00BkI963L9OS9wLA2Ak/nACZCgQma+FsTsbYtZQm4nk+rtabM8b9JgzSi3sPINb8fg==';
     protected const ECDSA256_PUBLIC_KEY_PATH = '';
+    public const SENTRY_ENABLE = false;
+    public const SENTRY_DSN = '';
 
     public const SERVERS = [
         'имя1' => [         // Сервера с именем бд всегда в нижнем регистре, префикс для серверов 'server_' полное имя бд: 'server_имя1'

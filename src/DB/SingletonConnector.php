@@ -6,17 +6,37 @@ use Microwin7\PHPUtils\Main;
 use Microwin7\PHPUtils\Configs\MainConfig;
 use Microwin7\PHPUtils\Exceptions\ServerNotFoundException;
 
-class Connector
+class SingletonConnector
 {
-    protected $database = [];
 
-    public function __get($database): DriverPDO|DriverMySQLi
+    private static $database = [];
+
+    public function __get(string $database): DriverPDO|DriverMySQLi
     {
-        if (array_key_exists($database, $this->database)) return $this->database[$database];
+        if (array_key_exists($database, self::$database)) return self::$database[$database];
         return $this->getConnect($database);
     }
-
-    private function getConnect($database)
+    public static function get(string $database = ''): DriverPDO|DriverMySQLi
+    {
+        if (array_key_exists($database, self::$database)) return self::$database[$database];
+        return self::getConnect($database);
+    }
+    /**
+     * Singletons should not be cloneable.
+     */
+    protected function __clone()
+    {
+    }
+    /**
+     * Singletons should not be restorable from strings.
+     * 
+     * @throws Exception
+     */
+    public function __wakeup()
+    {
+        throw new \Exception("Cannot unserialize a singleton.");
+    }
+    private static function getConnect($database)
     {
         if (empty($database) || $database == MainConfig::DB_NAME) $database = MainConfig::DB_NAME;
         else {
@@ -33,8 +53,8 @@ class Connector
                 }
             }
         }
-        if (array_key_exists($database, $this->database)) return $this->database[$database];
-        return $this->database[$database] = match (MainConfig::DB_DRIVER) {
+        if (array_key_exists($database, self::$database)) return self::$database[$database];
+        return self::$database[$database] = match (MainConfig::DB_DRIVER) {
             DriverTypeEnum::MySQLi => new DriverMySQLi($database, $module['prefix'] ?? ''),
             DriverTypeEnum::PDO => new DriverPDO($database, $module['prefix'] ?? ''),
         };

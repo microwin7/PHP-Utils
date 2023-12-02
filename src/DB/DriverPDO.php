@@ -2,8 +2,8 @@
 
 namespace Microwin7\PHPUtils\DB;
 
+use Microwin7\PHPUtils\Utils\DebugDB;
 use Microwin7\PHPUtils\Configs\MainConfig;
-use Microwin7\PHPUtils\Utils\Debug;
 
 class DriverPDO
 {
@@ -14,16 +14,16 @@ class DriverPDO
     private $table_prefix;
     private $insert_id;
     private $database;
-    private Debug $debug;
+    private DebugDB $debug;
 
     public function __construct($database = MainConfig::DB_NAME, $table_prefix = '')
     {
         $this->table_prefix = $table_prefix;
         $this->database = $database;
-        $this->debug = new Debug;
         $this->generateDSN();
+        $this->debug = new DebugDB;
         try {
-            $this->DBH = new \PDO($this->DSN, MainConfig::DB_USER, MainConfig::DB_PASS, [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION, \PDO::ATTR_PERSISTENT => true]);
+            $this->DBH = new \PDO($this->DSN, MainConfig::DB_USER, MainConfig::DB_PASS, MainConfig::DB_PDO_OPTIONS);
             $this->preConnectionExec();
         } catch (\PDOException $e) {
             $this->debug->debug_error("[{$this->database}] Connection ERROR: [CODE: " . $e->errorInfo[1]  . " | MESSAGE: " . $e->errorInfo[2] . " ]");
@@ -32,25 +32,18 @@ class DriverPDO
     }
     private function generateDSN()
     {
-        switch (strtolower(MainConfig::DB_SUD_DB)) {
-            case 'pgsql':
-                $this->DSN = "pgsql:host=" . MainConfig::DB_HOST . ";port=" . MainConfig::DB_PORT . ";dbname=" . $this->database;
-                break;
-            default:
-                $this->DSN = "mysql:host=" . MainConfig::DB_HOST . ";port=" . MainConfig::DB_PORT . ";dbname=" . $this->database . ";charset=utf8mb4";
-        }
+        $this->DSN = MainConfig::DB_SUD_DB->value . ':host=' . MainConfig::DB_HOST . ';port=' . MainConfig::DB_PORT . ';dbname=' . $this->database;
+        $this->DSN .= match (MainConfig::DB_SUD_DB) {
+            SubDBTypeEnum::MySQL =>  ';charset=utf8mb4',
+            SubDBTypeEnum::PostgreSQL => '',
+        };
     }
     private function preConnectionExec()
     {
-        switch (strtolower(MainConfig::DB_SUD_DB)) {
-            case 'pgsql':
-                break;
-            case 'mysql':
-                // $this->DBH->exec("set session wait_timeout = 3600; set session interactive_timeout = 3600;");
-                break;
-            default:
-                break;
-        }
+        match (MainConfig::DB_SUD_DB) {
+            SubDBTypeEnum::MySQL => null, //$this->DBH->exec("set session wait_timeout = 3600; set session interactive_timeout = 3600;")
+            SubDBTypeEnum::PostgreSQL => null,
+        };
     }
     public function __destruct()
     {
@@ -80,34 +73,21 @@ class DriverPDO
                 $arr = $this->refValues(...$params);
                 $param_id = 1;
                 foreach (str_split($param_type) as $var_type) {
-                    switch ($var_type) {
-                        case 's':
-                            $this->STH->bindValue($param_id, $arr[$param_id - 1], \PDO::PARAM_STR);
-                            break;
-                        case 'i':
-                            $this->STH->bindValue($param_id, $arr[$param_id - 1], \PDO::PARAM_INT);
-                            break;
-                        case 'b':
-                            $this->STH->bindValue($param_id, $arr[$param_id - 1], \PDO::PARAM_BOOL);
-                            break;
-                        case 'n':
-                            $this->STH->bindValue($param_id, $arr[$param_id - 1], \PDO::PARAM_NULL);
-                            break;
-                        case 'l':
-                            $this->STH->bindValue($param_id, $arr[$param_id - 1], \PDO::PARAM_LOB);
-                            break;
-                        case 'c':
-                            $this->STH->bindValue($param_id, $arr[$param_id - 1], \PDO::PARAM_STR_CHAR);
-                            break;
-                        default:
-                            $this->STH->bindValue($param_id, $arr[$param_id - 1], \PDO::PARAM_STR);
-                    }
+                    match ($var_type) {
+                        's' => $this->STH->bindValue($param_id, $arr[$param_id - 1], \PDO::PARAM_STR),
+                        'i' => $this->STH->bindValue($param_id, $arr[$param_id - 1], \PDO::PARAM_INT),
+                        'b' => $this->STH->bindValue($param_id, $arr[$param_id - 1], \PDO::PARAM_BOOL),
+                        'n' => $this->STH->bindValue($param_id, $arr[$param_id - 1], \PDO::PARAM_NULL),
+                        'l' => $this->STH->bindValue($param_id, $arr[$param_id - 1], \PDO::PARAM_LOB),
+                        'c' => $this->STH->bindValue($param_id, $arr[$param_id - 1], \PDO::PARAM_STR_CHAR),
+                        default => $this->STH->bindValue($param_id, $arr[$param_id - 1], \PDO::PARAM_STR)
+                    };
                     $param_id++;
                 }
             }
         }
     }
-    public function query($sql, $param_type = "", ...$params)
+    public function query($sql, $param_type = "", ...$params): static
     {
         $sql = $this->sql . $sql;
         $this->sql = null;
@@ -141,7 +121,7 @@ class DriverPDO
         }
         return $this;
     }
-    public function getStatementHandler()
+    public function getStatementHandler(): \PDOStatement
     {
         return $this->STH;
     }
@@ -150,34 +130,59 @@ class DriverPDO
     {
         return $this->array();
     }
-    // null|false|mixed Первое значение в массиве
-    public function value()
+    // Возвращаемое значение, единственное
+    public function value(): null|int|float|string|false
     {
         $value = $this->row();
-        if (!empty($value)) return $value[0];
-        return $value;
+        return false === $value ? $value : $value[0];
     }
-    // null|false|array Индексированный массив одной строки (Не подлежит перебору)
-    public function row()
+    // Индексированный массив одной строки (Не подлежит перебору)
+    public function row(): array|false
     {
         return $this->STH->fetch(\PDO::FETCH_NUM);
     }
-    // null|false|array Ассоциативный массив одной строки (Не подлежит перебору)
-    public function assoc()
+    // Ассоциативный массив одной строки (Не подлежит перебору)
+    public function assoc(): array|null|false
     {
         return $this->STH->fetch(\PDO::FETCH_ASSOC);
     }
-    // null|false|array Ассоциативный массив всех строк ответа
-    public function array()
+    // Значение из конкретной колонки, по умолчанию первой
+    public function column(int $column = 0): null|int|float|string|false
+    {
+        $value = $this->row();
+        return false === $value ? $value : $value[$column];
+    }
+    // Ассоциативный массив всех строк ответа
+    public function array(): array|null|false
     {
         return $this->STH->fetchAll(\PDO::FETCH_ASSOC);
     }
-    // [] Индексированный массив объектов результата
-    public function object()
+    // Индексированный и Ассоциативный массив всех строк ответа
+    public function all(): array|null|false
     {
-        return $this->STH->fetchAll(\PDO::FETCH_OBJ);
+        return $this->STH->fetchAll();
     }
-    public function id()
+    // Объект одной строки
+    public function obj(string $class = "stdClass", array $constructor_args = []): object|null|false
+    {
+        return $this->STH->fetchObject($class, $constructor_args);
+    }
+    /**
+     * Индексированный массив объектов результата
+     * Use objects()
+     * @deprecated
+     * @return array
+     */
+    public function object(): array
+    {
+        return $this->objects();
+    }
+    // Индексированный массив объектов результата
+    public function objects(string $class = "stdClass", array $constructor_args = []): array
+    {
+        return $this->STH->fetchAll(\PDO::FETCH_CLASS, $class, $constructor_args);
+    }
+    public function id(): int|string
     {
         return $this->insert_id;
     }

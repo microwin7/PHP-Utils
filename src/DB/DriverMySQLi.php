@@ -2,24 +2,24 @@
 
 namespace Microwin7\PHPUtils\DB;
 
+use Microwin7\PHPUtils\Utils\DebugDB;
 use Microwin7\PHPUtils\Configs\MainConfig;
-use Microwin7\PHPUtils\Utils\Debug;
 
 class DriverMySQLi
 {
 	private $mysqli;
-	private $last;
+	private \mysqli_result|false $last_result;
 	private $sql = '';
 	private $table_prefix;
 	private $insert_id;
 	private $database;
-	private Debug $debug;
+	private DebugDB $debug;
 
 	public function __construct($database = MainConfig::DB_NAME, $table_prefix = '')
 	{
 		$this->table_prefix = $table_prefix;
 		$this->database = $database;
-		$this->debug = new Debug;
+		$this->debug = new DebugDB;
 		$this->mysqli = new \mysqli(MainConfig::DB_HOST, MainConfig::DB_USER, MainConfig::DB_PASS, $database, MainConfig::DB_PORT);
 		if ($this->mysqli->connect_errno) $this->debug->debug("Connect error: {$this->mysqli->connect_error}");
 		$this->mysqli->set_charset("utf8");
@@ -73,62 +73,81 @@ class DriverMySQLi
 				"[{$this->database}] Statement execution error: {$this->mysqli->error}\n$sql");
 			exit('MySQL query error');
 		}
-		$this->last = $stmt->get_result();
+		$this->last_result = $stmt->get_result();
 		$this->insert_id = @$stmt->insert_id;
 		$stmt->close();
 		return $this;
 	}
-	// mysqli_result
-	public function result()
+	public function result(): \mysqli_result|false
 	{
-		return $this->last;
+		return $this->last_result;
 	}
-	// null|false|mixed Первое значение в массиве
-	public function value()
+
+	// Возвращаемое значение, единственное
+	public function value(): null|int|float|string|false
 	{
-		if ($this->last === null || $this->last === false) return $this->last;
-		$array = $this->last->fetch_row();
-		if (!empty($array)) return $array[0];
-		return $array;
+		return $this->column();
 	}
-	// null|false|array Индексированный массив одной строки (Не подлежит перебору)
-	public function row()
+	// Индексированный массив одной строки (Не подлежит перебору)
+	public function row(): array|null|false
 	{
-		if ($this->last === null || $this->last === false) return $this->last;
-		return $this->last->fetch_row();
+		if ($this->last_result === false) return $this->last_result;
+		return $this->last_result->fetch_row();
 	}
-	// null|false|array Ассоциативный массив одной строки (Не подлежит перебору)
-	public function assoc()
+	// Ассоциативный массив одной строки (Не подлежит перебору)
+	public function assoc(): array|null|false
 	{
-		if ($this->last === null || $this->last === false) return $this->last;
-		return $this->last->fetch_assoc();
+		if ($this->last_result === false) return $this->last_result;
+		return $this->last_result->fetch_assoc();
 	}
-	// null|false|array Ассоциативный массив всех строк ответа
-	public function array()
+	// Значение из конкретной колонки, по умолчанию первой
+	public function column(int $column = 0): null|int|float|string|false
 	{
-		if ($this->last === null || $this->last === false) return $this->last;
+		if ($this->last_result === false) return $this->last_result;
+		return $this->last_result->fetch_column($column);
+	}
+	// Ассоциативный массив всех строк ответа
+	public function array(): array|null|false
+	{
+		if ($this->last_result === null || $this->last_result === false) return $this->last_result;
 		$array = [];
-		foreach ($this->last as $item) {
+		foreach ($this->last_result as $item) {
 			$array[] = $item;
 		}
 		return $array;
 	}
-	// null|false|array Индексированный массив одной строки (Не подлежит перебору)
-	public function all()
+	// Индексированный и Ассоциативный массив всех строк ответа
+	public function all(): array|null|false
 	{
-		if ($this->last === null || $this->last === false) return $this->last;
-		return $this->last->fetch_all();
+		if ($this->last_result === null || $this->last_result === false) return $this->last_result;
+		return $this->last_result->fetch_all(MYSQLI_BOTH);
 	}
-	// [] Индексированный массив объектов результата
-	public function object()
+	// Объект одной строки
+	public function obj(string $class = "stdClass", array $constructor_args = []): object|null|false
+	{
+		if ($this->last_result === null || $this->last_result === false) return $this->last_result;
+		return $this->last_result->fetch_object($class, $constructor_args);
+	}
+	/**
+	 * Индексированный массив объектов результата
+	 * Use objects()
+	 * @deprecated
+	 * @return array
+	 */
+	public function object(): array
+	{
+		return $this->objects();
+	}
+	// Индексированный массив объектов результата
+	public function objects(string $class = "stdClass", array $constructor_args = []): array
 	{
 		$array = [];
-		while ($obj = $this->last->fetch_object()) {
+		while ($obj = $this->last_result->fetch_object($class, $constructor_args)) {
 			$array[] = $obj;
 		}
 		return $array;
 	}
-	public function id()
+	public function id(): int|string
 	{
 		return $this->insert_id;
 	}

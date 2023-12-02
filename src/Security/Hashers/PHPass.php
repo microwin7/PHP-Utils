@@ -8,7 +8,12 @@ class PHPass
 {
     private const PHPASS_ITOA64 = './0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 
-    public static function phpass_validation($password, $encryptedPassword)
+    /**
+     * @return bool
+     * 
+     * @throws \Microwin7\PHPUtils\Exceptions\NumberFormatException
+     */
+    public static function phpass_validation($password, $encryptedPassword): bool
     {
         $id = substr($encryptedPassword, 0, 3);
         $entry = strpos(self::PHPASS_ITOA64, $encryptedPassword[3]);
@@ -24,10 +29,9 @@ class PHPass
         do {
             $hash_new = md5($hash_new . $password, TRUE);
         } while (--$count);
-        $enc = self::enc64($hash_new, 16);
-        return $enc === $hash;
+        return self::enc64($hash_new, 16) === $hash;
     }
-    private static function enc64($input, $count)
+    private static function enc64($input, $count): string
     {
         $itoa64 = self::PHPASS_ITOA64;
         $output = '';

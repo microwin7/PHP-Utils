@@ -3,7 +3,7 @@
 namespace Microwin7\PHPUtils\Exceptions\Handler;
 
 use Microwin7\PHPUtils\Configs\MainConfig;
-use Microwin7\PHPUtils\Response\Response;
+use Microwin7\PHPUtils\Response\JsonResponse;
 
 /**
  * Use:
@@ -12,7 +12,12 @@ use Microwin7\PHPUtils\Response\Response;
  *             "Microwin7\\PHPUtils\\Exceptions\\Handler\\": "src/Exceptions/Handler/",
  *         }
  *     },
- * 
+ * Need AutoLoads or creater object
+ *     "autoload": {
+ *         "files": [
+ *             "src/AutoLoads/InitExceptionHandler.php",
+ *         ]
+ *     },
  */
 class ExceptionHandler
 {
@@ -26,19 +31,19 @@ class ExceptionHandler
         /**
          * Sets a user-defined exception handler function
          */
-        //set_exception_handler(array($this, 'exception_handler'));
+        set_exception_handler(array($this, 'exception_handler'));
     }
-    public function exception_handler(\Throwable $exception)
+    public function exception_handler(\Throwable $e)
     {
         /**
          * Example:
          */
-        if ($exception instanceof \Throwable) {
+        if ($e instanceof \Throwable) {
             /**
              * Need Library Sentry, install: composer require sentry/sdk
              */
             //if (MainConfig::SENTRY_ENABLE) \Sentry\captureException($e);
-            Response::failed(error: $exception->getMessage());
+            JsonResponse::failed(error: $e->getMessage());
         }
     }
 }

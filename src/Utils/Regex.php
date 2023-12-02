@@ -2,7 +2,7 @@
 
 namespace Microwin7\PHPUtils\Utils;
 
-use Microwin7\PHPUtils\Response\Response;
+use Microwin7\PHPUtils\Response\JsonResponse;
 
 class Regex
 {
@@ -64,6 +64,6 @@ class Regex
     }
     private function reply()
     {
-        Response::failed('[' . $this->last_name . '] ' . $this->last_data . ' - значение не прошло проверку');
+        JsonResponse::failed('[' . $this->last_name . '] ' . $this->last_data . ' - значение не прошло проверку');
     }
 }

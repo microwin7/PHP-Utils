@@ -13,11 +13,27 @@ class Rcon
 {
     protected $server;
 
-    public function selectServer(string $server_name)
+    /**
+     * Undocumented function
+     *
+     * @param string $server_name
+     * @return $this
+     */
+    public function selectServer(string $server_name): static
     {
         $this->server = $server_name;
         return $this;
     }
+    /**
+     * Undocumented function
+     *
+     * @param string $command
+     * @param string $username
+     * @param boolean $check_correct_server
+     * @return void
+     * 
+     * @throws \Microwin7\PHPUtils\Exceptions\RconConnectException
+     */
     public function sendRconCommand(string $command, $username = '', $check_correct_server = true): void
     {
         $this->checkEmptyServer();
@@ -32,19 +48,47 @@ class Rcon
         $rcon->sendCommand($command . ' ' . $username);
         $rcon->disconnect();
     }
+    /**
+     * Undocumented function
+     *
+     * @return void
+     * 
+     * @throws \Microwin7\PHPUtils\Exceptions\ServerNotSelected
+     */
     private function checkEmptyServer(): void
     {
         if (empty($this->server)) throw new ServerNotSelected;
     }
-    private function checkServer()
+    /**
+     * Undocumented function
+     *
+     * @return void
+     * 
+     * @throws \Microwin7\PHPUtils\Exceptions\SolutionDisabledException
+     */
+    private function checkServer(): void
     {
         if (!@MainConfig::SERVERS[Main::getCorrectServer($this->server)]['rcon']['enable']) throw new SolutionDisabledException;
     }
+    /**
+     * Undocumented function
+     *
+     * @param string $username
+     * @return void
+     * 
+     * @throws \Microwin7\PHPUtils\Exceptions\RequiredArgumentMissingException
+     */
     public function teleportToSpawn(string $username): void
     {
         if (empty($username)) throw new RequiredArgumentMissingException;
         $this->sendRconCommand('otp', $username);
     }
+    /**
+     * Undocumented function
+     *
+     * @param string $command
+     * @return array
+     */
     public function broadcast(string $command): array
     {
         $deny_servers = [];

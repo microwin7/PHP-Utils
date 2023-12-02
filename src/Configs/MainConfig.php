@@ -2,29 +2,45 @@
 
 namespace Microwin7\PHPUtils\Configs;
 
+use Microwin7\PHPUtils\DB\DriverTypeEnum;
+use Microwin7\PHPUtils\DB\SubDBTypeEnum;
+
 class MainConfig
 {
     // Подключение к БД сайта
-    public const DB_HOST = 'localhost';
-    public const DB_NAME = 'test';
-    public const DB_USER = 'test';
-    public const DB_PASS = 'test';
-    public const DB_PORT = '3306';
-    public const DB_DRIVER = 'PDO'; // MySQLi, PDO | Default: MySQLi
-    public const DB_SUD_DB = 'mysql'; // DSN префикс для PDO [mysql, pgsql] | Default: mysql
+    public const string DB_HOST = 'localhost';
+    public const string DB_NAME = 'test';
+    public const string DB_USER = 'test';
+    public const string DB_PASS = 'test';
+    public const string DB_PORT = '3306';
+    /**
+     * DriverTypeEnum::PDO [SubDBTypeEnum::MySQL, SubDBTypeEnum::PostgreSQL]
+     * DriverTypeEnum::MySQL [SubDBTypeEnum::MySQL]
+     */
+    public const DriverTypeEnum DB_DRIVER = DriverTypeEnum::PDO; // MySQLi, PDO | Default: MySQLi
+    /**
+     * DSN префикс Sub DB для PDO
+     * SubDBTypeEnum::MySQL
+     * SubDBTypeEnum::PostgreSQL
+     */
+    public const SubDBTypeEnum DB_SUD_DB = SubDBTypeEnum::MySQL;
+    public const array DB_PDO_OPTIONS = [
+        \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+        \PDO::ATTR_PERSISTENT => true
+    ];
     // Префикс БД для SERVERS
-    public const DB_PREFIX = 'server_';
+    public const string DB_PREFIX = 'server_';
     // Запись в файлы лога SQL запросов и их ошибок
-    public const DEBUG = true;
-    public const BEARER_TOKEN = '';
-    public const PRIVATE_API_KEY = '';
+    public const bool DB_DEBUG = true;
+    public const string BEARER_TOKEN = '';
+    public const string PRIVATE_API_KEY = '';
     // https://base64.guru/converter/encode/file
-    protected const ECDSA256_PUBLIC_KEY_BASE64 = 'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEJDi51DKs5f6ERSrDDjns00BkI963L9OS9wLA2Ak/nACZCgQma+FsTsbYtZQm4nk+rtabM8b9JgzSi3sPINb8fg==';
-    protected const ECDSA256_PUBLIC_KEY_PATH = '';
-    public const SENTRY_ENABLE = false;
-    public const SENTRY_DSN = '';
+    protected const string ECDSA256_PUBLIC_KEY_BASE64 = 'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEJDi51DKs5f6ERSrDDjns00BkI963L9OS9wLA2Ak/nACZCgQma+FsTsbYtZQm4nk+rtabM8b9JgzSi3sPINb8fg==';
+    protected const string ECDSA256_PUBLIC_KEY_PATH = '';
+    public const bool SENTRY_ENABLE = false;
+    public const string SENTRY_DSN = '';
 
-    public const SERVERS = [
+    public const array SERVERS = [
         'имя1' => [         // Сервера с именем бд всегда в нижнем регистре, префикс для серверов 'server_' полное имя бд: 'server_имя1'
             'alias' => ['алиас_имя1'], // Алиасы имён сервера, по которым будет вызвано основное имя для подключение к бд
             'host' => '127.0.0.1',
@@ -46,7 +62,7 @@ class MainConfig
             ],
         ]
     ];
-    public const MODULES = [
+    public const array MODULES = [
         'LuckPerms' => [
             'DB_NAME' => 'LuckPerms',
             'prefix' => 'luckperms_',

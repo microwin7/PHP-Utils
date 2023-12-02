@@ -9,7 +9,9 @@ class Main extends MainConfig {
      * Поиск и возвращение имени сервера, если оно есть в алиас или главном имени, возвращает главное имя. Если сервер не найден, возвращает {@link \Microwin7\PHPUtils\Exceptions\ServerNotFoundException}
      *
      * @param string $server_name Принимает имя сервера, по которому будет произведён поиск основного имени сервера
-     * @return string|\Microwin7\PHPUtils\Exceptions\ServerNotFoundException Найденное имя сервера с учётом регистра, либо исключение
+     * @return string Найденное имя сервера с учётом регистра, либо исключение
+     * 
+     * @throws \Microwin7\PHPUtils\Exceptions\ServerNotFoundException
      */
     public static function getServerWithoutDefault(string $server_name = '')
     {
@@ -44,7 +46,9 @@ class Main extends MainConfig {
      * Поиск и возвращение только по алиас именам сервера, возвращает алиас имя. Если алиас имя среди серверов не найдено, возвращает {@link \Microwin7\PHPUtils\Exceptions\AliasServerNotFoundException}
      *
      * @param string $server_name Принимает алиас имя сервера, для поиска соответствия имени
-     * @return string|\Microwin7\PHPUtils\Exceptions\AliasServerNotFoundException Найденное алиас имя сервера с учётом регистра, либо исключение
+     * @return string Найденное алиас имя сервера с учётом регистра, либо исключение
+     * 
+     * @throws \Microwin7\PHPUtils\Exceptions\AliasServerNotFoundException
      */
     public static function getAliasServerWithoutDefault(string $server_name = '')
     {

@@ -2,6 +2,9 @@
 
 namespace Microwin7\PHPUtils\Response;
 
+/**
+ * @deprecated
+ */
 class ResponseConstructor
 {
     private $data = [];

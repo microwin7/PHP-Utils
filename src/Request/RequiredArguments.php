@@ -3,37 +3,46 @@
 namespace Microwin7\PHPUtils\Request;
 
 use Microwin7\PHPUtils\Attributes\AsArguments;
-use Microwin7\PHPUtils\Exceptions\Handler\ExceptionHandler;
+use Microwin7\PHPUtils\Attributes\RegexArguments;
+use Microwin7\PHPUtils\Contracts\Enum\EnumInterface;
 use Microwin7\PHPUtils\Exceptions\RequiredArgumentMissingException;
 
-class RequiredArguments extends ExceptionHandler
+class RequiredArguments
 {
     private array $arguments;
     private array $requiredArguments;
     private ?array $optionalArguments;
     private array $where;
 
-    private AsArguments $attributesInstance;
+    private AsArguments $argumentsInstance;
+    private ?array $regexArguments = null;
 
     public function __construct()
     {
-        parent::__construct();
-        $this->attributesInstance = $this->getAttributesInstance();
+        $this->argumentsInstance = $this->getArgumentsInstance();
+        $this->setRegexArguments();
         $this->setWhereSearch()->setRequiredArguments()->setOptionalArguments()->execute();
     }
     public function __get($name): string|array|null
     {
         return $this->arguments[$name];
     }
-    private static function getAttributesInstance(): object
+    private function getArgumentsInstance(): object
     {
-        if ($attribute = (new \ReflectionClass(static::class))->getAttributes(AsArguments::class)) {
-            return $attribute[0]->newInstance();
+        if ($attributes = (new \ReflectionClass(static::class))->getAttributes(AsArguments::class)) {
+            return $attributes[0]->newInstance();
+        }
+    }
+    private function setRegexArguments(): void
+    {
+        foreach ((new \ReflectionClass(static::class))->getAttributes(RegexArguments::class) as $attribute) {
+            $instance = $attribute->newInstance();
+            $this->regexArguments[$instance->argument] = $instance->regexp;
         }
     }
     private function setWhereSearch(): static
     {
-        $this->where = match ($this->attributesInstance->whereSearch) {
+        $this->where = match ($this->argumentsInstance->whereSearch) {
             'GET' => $_GET,
             'POST' => $_POST,
             'REQUEST' => $_REQUEST,
@@ -43,46 +52,88 @@ class RequiredArguments extends ExceptionHandler
     }
     private function setRequiredArguments(): static
     {
-        $this->requiredArguments = $this->attributesInstance->required;
+        $this->requiredArguments = $this->argumentsInstance->required;
         return $this;
     }
     private function setOptionalArguments(): static
     {
-        $this->optionalArguments = $this->attributesInstance?->optional;
+        $this->optionalArguments = $this->argumentsInstance?->optional;
         return $this;
     }
-    private function execute(): static
+    /**
+     * Undocumented function
+     *
+     * @return static
+     * 
+     * @throws \Microwin7\PHPUtils\Exceptions\RequiredArgumentMissingException
+     * @throws \InvalidArgumentException
+     */
+    private function execute(): void
     {
         if ((!empty($this->requiredArguments) && !empty($this->where)) && count($this->requiredArguments) <= count($this->where)) {
             foreach ($this->requiredArguments as $argument) {
-                if (is_string($argument)) {
-                    $this->with($argument, $this->where[$argument] ?? new RequiredArgumentMissingException($this->requiredArguments));
-                } else {
+                if (is_array($argument)) {
                     $count = 0;
                     foreach ($argument as $oneFromAllArgumets) {
-                        if (isset($this->where[$oneFromAllArgumets])) {
-                            $this->with($oneFromAllArgumets, $this->where[$oneFromAllArgumets]);
+                        try {
+                            $this->setVariable($oneFromAllArgumets);
                             $count++;
-                        } else {
+                        } catch (RequiredArgumentMissingException $ignored) {
                             $this->with($oneFromAllArgumets, null);
                         }
                     }
-                    if ($count === 0) new RequiredArgumentMissingException(implode(' or ', $argument));
+                    if ($count === 0) throw new RequiredArgumentMissingException(implode(' or ', $argument));
+                } else if (is_string($argument)) {
+                    $this->setVariable($argument);
                 }
             }
         } else throw new RequiredArgumentMissingException($this->requiredArguments);
         if (!empty($this->optionalArguments)) {
-            foreach (array_intersect($this->requiredArguments, $this->optionalArguments) as $argument) {
-                unset($this->optionalArguments[$argument]);
+            foreach ($this->requiredArguments as $v) {
+                if (is_array($v)) {
+                    foreach ($v as $v2level) {
+                        foreach (array_keys($this->optionalArguments, $v2level) as $k) {
+                            unset($this->optionalArguments[$k]);
+                        }
+                    }
+                }
+                foreach (array_keys($this->optionalArguments, $v) as $k) {
+                    unset($this->optionalArguments[$k]);
+                }
             }
             foreach ($this->optionalArguments as $argument) {
-                $this->with($argument, $this->where[$argument] ?? null);
+                $this->setVariable($argument, true);
             }
         }
-        return $this;
     }
-    // array value??
-    private function with(string $property, string|array|null $value): void
+    private function setVariable(string $argument, bool $optional = false)
+    {
+        if (strrpos($argument, '\\') === false) {
+            $this->with($argument, $this->where[$argument] ?? ($optional ? null : throw new RequiredArgumentMissingException($argument)));
+            if (isset($this->regexArguments[$argument])) $this->validateVariable($argument, $this->regexArguments[$argument]);
+        } else if (enum_exists($argument)) {
+            // var_dump(is_a($argument, EnumInterface::class, true));
+            $argumentClazz = new \ReflectionClass($argument);
+            if ($argumentClazz->implementsInterface(EnumInterface::class) && $argumentClazz->implementsInterface(\BackedEnum::class)) {
+                try {
+                    if (is_numeric($this->where[$argument::getNameRequestVariable()]))
+                        $this->with($argument::getNameVariable(), $argument::from((int)$this->where[$argument::getNameRequestVariable()]));
+                    else
+                        $this->with($argument::getNameVariable(), $argument::fromString($this->where[$argument::getNameRequestVariable()]));
+                } catch (\InvalidArgumentException $exception) {
+                    if (!$optional) throw new \InvalidArgumentException($exception);
+                    $this->with($argument::getNameVariable(), $argument::getDefault());
+                }
+            }
+        }
+    }
+    protected function validateVariable(string $key, string $regexp): void
+    {
+        null === $this->$key
+            ?: filter_var($this->$key, FILTER_VALIDATE_REGEXP, ['options' => ['regexp' => $regexp]])
+            ?: throw new \ValueError(sprintf('Field "' . $key . '" should be valid with pattern: [' . $regexp . '], "%s" given', $this->$key));
+    }
+    private function with(string $property, mixed $value): void
     {
         $this->arguments[$property] = $value;
     }

@@ -34,7 +34,7 @@ class Texture
      * Получение ссылки пути хранения скина/плаща с указанием вызываемого типа
      *
      * @param string $login
-     * @param string $type Допустимые параметры: <SKIN|CAPE>
+     * @param key-of<\Microwin7\PHPUtils\Configs\TextureConfig::TEXTURE_PATH> $type Допустимые параметры: <SKIN|CAPE>
      * @return string
      */
     public static function getTexturePath(string $login, string $type): string
@@ -50,6 +50,12 @@ class Texture
     {
         return str_ends_with_slash(TextureConfig::CAPE_PATH);
     }
+    /**
+     * Undocumented function
+     *
+     * @param key-of<\Microwin7\PHPUtils\Configs\TextureConfig::TEXTURE_PATH> $type
+     * @return string
+     */
     public static function getTexturePathStorage(string $type): string
     {
         return str_ends_with_slash(TextureConfig::TEXTURE_PATH[strtoupper($type)]);
@@ -67,7 +73,17 @@ class Texture
             ar_slash_string(TextureConfig::CAPE_URL_PATH) .
             $login . self::EXT();
     }
-    public static function validateSize($width, $height, $type)
+    /**
+     * Undocumented function
+     *
+     * @param int $width
+     * @param int $height
+     * @param key-of<\Microwin7\PHPUtils\Configs\TextureConfig::SIZE> $type
+     * @return true
+     * 
+     * @throws \Microwin7\PHPUtils\Exceptions\TextureSizeException
+     */
+    public static function validateSize(int $width, int $height, string $type): true
     {
         $valid_size = false;
         foreach (TextureConfig::SIZE[strtoupper($type)] as $value) {
@@ -75,10 +91,19 @@ class Texture
                 $valid_size = true;
             }
         }
-        if (!$valid_size) throw new TextureSizeException;
-        return $valid_size;
+        return $valid_size ?: throw new TextureSizeException;
     }
-    public static function validateHDSize($width, $height, $type)
+    /**
+     * Undocumented function
+     *
+     * @param int $width
+     * @param int $height
+     * @param key-of<\Microwin7\PHPUtils\Configs\TextureConfig::SIZE_WITH_HD> $type
+     * @return true
+     * 
+     * @throws \Microwin7\PHPUtils\Exceptions\TextureSizeHDException
+     */
+    public static function validateHDSize(int $width, int $height, string $type): true
     {
         $valid_size = false;
         foreach (TextureConfig::SIZE_WITH_HD[strtoupper($type)] as $value) {
@@ -86,11 +111,14 @@ class Texture
                 $valid_size = true;
             }
         }
-        if (!$valid_size) throw new TextureSizeHDException;
-        return $valid_size;
+        return $valid_size ?: throw new TextureSizeHDException;
     }
     public static function EXT(): string
     {
         return empty(TextureConfig::EXT) ?: '.' . TextureConfig::EXT;
+    }
+    public static function digest($data): string
+    {
+        return hash('sha256', $data);
     }
 }

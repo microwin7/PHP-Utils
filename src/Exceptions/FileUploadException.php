@@ -9,7 +9,7 @@ class FileUploadException extends \Exception
         $message = $this->codeToMessage($code);
         parent::__construct($message, $code);
     }
-    private function codeToMessage(int $code)
+    private function codeToMessage(int $code): string
     {
         return match ($code) {
             UPLOAD_ERR_INI_SIZE => 'Размер принятого файла превысил максимально допустимый размер для загрузки',

@@ -14,6 +14,16 @@ use Microwin7\PHPUtils\Exceptions\NoSuchRequestMethodException;
  * @method \Microwin7\PHPUtils\Response\JsonResponse failed(?string $message = null, ?string $error = null, bool $need_success = false, int $code = 0, int $code_response = 400)
  * @method \Microwin7\PHPUtils\Response\JsonResponse json_encode(mixed $data = null)
  * @method \Microwin7\PHPUtils\Response\JsonResponse response(mixed $data = null)
+ * 
+ * @method static \Microwin7\PHPUtils\Response\JsonResponse message(string $message)
+ * @method static \Microwin7\PHPUtils\Response\JsonResponse error(string $error)
+ * @method static \Microwin7\PHPUtils\Response\JsonResponse code(int $code)
+ * @method static \Microwin7\PHPUtils\Response\JsonResponse code_response(int $code_response)
+ * @method static \Microwin7\PHPUtils\Response\JsonResponse extra(array $array)
+ * @method static \Microwin7\PHPUtils\Response\JsonResponse success(?string $message = null, bool $need_success = false)
+ * @method static \Microwin7\PHPUtils\Response\JsonResponse failed(?string $message = null, ?string $error = null, bool $need_success = false, int $code = 0, int $code_response = 400)
+ * @method static \Microwin7\PHPUtils\Response\JsonResponse json_encode(mixed $data = null)
+ * @method static \Microwin7\PHPUtils\Response\JsonResponse response(mixed $data = null)
  */
 class JsonResponse
 {
@@ -30,51 +40,88 @@ class JsonResponse
         null === $data ?: self::$data = $data;
     }
     /**
-     * Undocumented function
-     *
      * @param string  $method
      * @param array  $parameters
      * @return $this
      * 
-     * @throws \Microwin7\PHPUtils\Exceptions\NoSuchRequestMethodException
+     * @throws NoSuchRequestMethodException
      */
     public function __call($method, $parameters)
     {
-        if (method_exists($this, $method) && is_callable(self::class, $method) && !str_starts_with($method, '__')) {
-            $this->$method(...$parameters);
+        if (in_array($method, $this->getPublicMethodsWithoutMagic())) {
+            static::$method(...$parameters);
             return $this;
         }
         throw new NoSuchRequestMethodException();
     }
-    public static function message(string $message): void
+    /**
+     * @param string  $method
+     * @param array  $parameters
+     * @return void
+     * 
+     * @throws NoSuchRequestMethodException
+     */
+    public static function __callStatic($method, $parameters)
+    {
+        if (in_array($method, (new static)->getPublicMethodsWithoutMagic())) {
+            static::$method(...$parameters);
+        } else throw new NoSuchRequestMethodException();
+    }
+    /**
+     * @return string[]
+     *
+     * @psalm-return array{0?: string,...}
+     */
+    private function getPublicMethodsWithoutMagic(): array
+    {
+        return (new class extends JsonResponse
+        {
+            /**
+             * @return string[]
+             *
+             * @psalm-return array{0?: string,...}
+             */
+            function get($object): array
+            {
+                foreach ($arrayMethods = get_class_methods($object) as $k => $v) {
+                    if (!empty($v) && str_starts_with($v, '__')) unset($arrayMethods[$k]);
+                }
+                return $arrayMethods;
+            }
+        })->get($this);
+    }
+    protected static function message(string $message): void
     {
         self::$data['message'] = $message;
     }
-    public static function error(string $error): void
+    protected static function error(string $error): void
     {
         self::$data['error'] = $error;
     }
-    public static function code(int $code): void
+    protected static function code(int $code): void
     {
         self::$data['code'] = $code;
     }
-    public static function code_response(int $code_response): void
+    protected static function code_response(int $code_response): void
     {
         http_response_code($code_response);
     }
-    public static function extra(array $array)
+    protected static function extra(array $array): void
     {
         foreach ($array as $k => $v) {
             self::$data[$k] = $v;
         }
     }
-    public static function success(?string $message = null, bool $need_success = false): void
+    protected static function success(?string $message = null, bool $need_success = false): void
     {
         null === $message ?: self::message($message);
         !$need_success ?: self::$data['success'] = true;
         self::response();
     }
-    public static function failed(?string $message = null, ?string $error = null, bool $need_success = false, int $code = 0, int $code_response = 400): void
+    /**
+     * @return never
+     */
+    protected static function failed(?string $message = null, ?string $error = null, bool $need_success = false, int $code = 0, int $code_response = 400): void
     {
         null === $message ?: self::message($message);
         null === $error ?: self::error($error);
@@ -87,19 +134,22 @@ class JsonResponse
     {
         header("Content-Type: application/json; charset=UTF-8");
     }
-    public static function json_encode(mixed $data = null): string
+    /**
+     * @param string|array|object|null $data
+     * @return string|false
+     */
+    protected static function json_encode(string|array|object|null $data = null): string|false
     {
         return json_encode(null !== $data ? $data : (!empty(self::$data) ? self::$data : new \stdClass), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION);
     }
     /**
-     * Undocumented function
-     *
      * @param mixed $data
+     *
      * @return never
      */
-    public static function response(mixed $data = null)
+    protected static function response(mixed $data = null)
     {
         self::header();
-        die(self::json_encode(null !== $data ? $data : (!empty(self::$data) ? self::$data : new \stdClass)));
+        die(self::json_encode(null !== $data ? $data : (!empty(self::$data) ? self::$data : new \stdClass)) ?: self::json_encode(['error' => 'JSON encoding error']));
     }
 }

@@ -2,12 +2,15 @@
 
 namespace Microwin7\PHPUtils\Utils;
 
-use Microwin7\PHPUtils\Main;
+use Microwin7\PHPUtils\Configs\MainConfig;
 use Microwin7\PHPUtils\Configs\PathConfig;
 
 class DebugDB
 {
-	private function file_put_contents($path, $message)
+	/**
+	 * @psalm-param 'debug'|'debug_error' $path
+	 */
+	private function file_put_contents(string $path, string $message): void
 	{
 		$directory = PathConfig::DB_LOG_FOLDER;
 		if (defined('DB_MODULE_NAME')) {
@@ -18,15 +21,16 @@ class DebugDB
 			mkdir($directory, 0777, true);
 		file_put_contents($directory . $path . '_' . date("Y.n") . '.log', date('[d] | H:i:s - ') . $message . "\n", FILE_APPEND);
 	}
-	public function debug($message)
+	public function debug(string $message): void
 	{
-		if (Main::DB_DEBUG) $this->file_put_contents(__FUNCTION__, $message);
+		if (MainConfig::DB_DEBUG) $this->file_put_contents(__FUNCTION__, $message);
 	}
-	public function debug_error($message)
+	public function debug_error(string $message): void
 	{
-		if (Main::DB_DEBUG) $this->file_put_contents(__FUNCTION__, $message);
+		if (MainConfig::DB_DEBUG) $this->file_put_contents(__FUNCTION__, $message);
 	}
-	public function debug_extra($message, $folder= 'extra'){
-		if (Main::DB_DEBUG) $this->file_put_contents($folder, $message);
+	public function debug_extra(string $message, string $folder= 'extra'): void
+    {
+		if (MainConfig::DB_DEBUG) $this->file_put_contents($folder, $message);
 	}
 }

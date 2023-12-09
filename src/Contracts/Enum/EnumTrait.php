@@ -6,6 +6,10 @@ namespace Microwin7\PHPUtils\Contracts\Enum;
 
 trait EnumTrait
 {
+    /**
+     * @return array<int|string, string>
+     * @psalm-suppress InvalidReturnType
+     */
     public static function getCases(): array
     {
         return array_combine(
@@ -16,7 +20,7 @@ trait EnumTrait
     public static function fromString(string $name): static
     {
         return static::tryFromString($name)
-            ?? throw new \InvalidArgumentException(sprintf('Unknown ' . static::getNameVariable() . ': %s', $name));
+            ?? throw new \InvalidArgumentException(sprintf('Unknown %s: %s', static::getNameVariable(), $name));
     }
     public static function tryFromString(string $name): ?static
     {

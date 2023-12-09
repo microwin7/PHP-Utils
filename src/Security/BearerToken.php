@@ -20,24 +20,24 @@ class BearerToken
         }
         return null;
     }
-    /**
-     * Undocumented function
-     * 
+    /** 
      * @deprecated
      * @return string
      */
     public static function getBearer(): string
     {
-        return substr(@array_change_key_case(getallheaders())['authorization']  ?? '', 7) ?? ''; // в конце нужно до 8.0, после возвращается ""
+        return substr(@array_change_key_case(getallheaders())['authorization']  ?? '', 7);
     }
     public static function validateBearer(): bool
     {
         return static::getBearerToken() === MainConfig::BEARER_TOKEN;
     }
-    /** 
+    /**
      * Getting Authorization header
-     * */
-    public static function get_authorization_header()
+     *
+     * @return null|string
+     */
+    public static function get_authorization_header(): string|null
     {
         $headers = null;
         if (isset($_SERVER['Authorization'])) {

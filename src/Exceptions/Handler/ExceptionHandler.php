@@ -33,7 +33,7 @@ class ExceptionHandler
          */
         set_exception_handler(array($this, 'exception_handler'));
     }
-    public function exception_handler(\Throwable $e)
+    public function exception_handler(\Throwable $e): void
     {
         /**
          * Example:

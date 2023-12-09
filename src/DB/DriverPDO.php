@@ -10,13 +10,13 @@ class DriverPDO
     private \PDO $DBH;
     private string $DSN;
     private \PDOStatement $STH;
-    private $sql = '';
-    private $table_prefix;
-    private $insert_id;
-    private $database;
+    private string $sql = '';
+    private string $table_prefix;
+    private int|string|null $insert_id;
+    private string $database;
     private DebugDB $debug;
 
-    public function __construct($database = MainConfig::DB_NAME, $table_prefix = '')
+    public function __construct(string $database = MainConfig::DB_NAME, string $table_prefix = '')
     {
         $this->table_prefix = $table_prefix;
         $this->database = $database;
@@ -30,7 +30,7 @@ class DriverPDO
             exit('PDO Connection ERROR');
         }
     }
-    private function generateDSN()
+    private function generateDSN(): void
     {
         $this->DSN = MainConfig::DB_SUD_DB->value . ':host=' . MainConfig::DB_HOST . ';port=' . MainConfig::DB_PORT . ';dbname=' . $this->database;
         $this->DSN .= match (MainConfig::DB_SUD_DB) {
@@ -38,7 +38,7 @@ class DriverPDO
             SubDBTypeEnum::PostgreSQL => '',
         };
     }
-    private function preConnectionExec()
+    private function preConnectionExec(): void
     {
         match (MainConfig::DB_SUD_DB) {
             SubDBTypeEnum::MySQL => null, //$this->DBH->exec("set session wait_timeout = 3600; set session interactive_timeout = 3600;")
@@ -48,25 +48,28 @@ class DriverPDO
     public function __destruct()
     {
     }
-    private function table($table)
+    private function table(string $table): string
     {
         return $this->table_prefix . $table . ' ';
     }
-    public function update($table)
+    public function update(string $table): static
     {
         $this->sql = "UPDATE " . $this->table($table);
         return $this;
     }
-    private function refValues(...$arr)
+    /**
+     * @psalm-return array<never, never>
+     */
+    private function refValues(...$arr): array
     {
         $refs = [];
-        foreach ($arr as $key => $value) {
+        foreach ($arr as $key => $_) {
             $refs[$key] = &$arr[$key];
         }
         return $refs;
     }
 
-    private function bind_param($param_type, ...$params)
+    private function bind_param(string $param_type, ...$params): void
     {
         if (!empty($params)) {
             if (!empty($param_type) && is_string($param_type)) {
@@ -87,7 +90,7 @@ class DriverPDO
             }
         }
     }
-    public function query($sql, $param_type = "", ...$params): static
+    public function query(string $sql, string $param_type = "", ...$params): static
     {
         $sql = $this->sql . $sql;
         $this->sql = null;
@@ -126,7 +129,7 @@ class DriverPDO
         return $this->STH;
     }
     // mysqli_result
-    public function result()
+    public function result(): array
     {
         return $this->array();
     }
@@ -153,7 +156,7 @@ class DriverPDO
         return false === $value ? $value : $value[$column];
     }
     // Ассоциативный массив всех строк ответа
-    public function array(): array|null|false
+    public function array(): array
     {
         return $this->STH->fetchAll(\PDO::FETCH_ASSOC);
     }
@@ -182,7 +185,7 @@ class DriverPDO
     {
         return $this->STH->fetchAll(\PDO::FETCH_CLASS, $class, $constructor_args);
     }
-    public function id(): int|string
+    public function id(): int|string|null
     {
         return $this->insert_id;
     }

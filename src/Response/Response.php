@@ -25,7 +25,7 @@ class Response
     {
         http_response_code($code_response);
     }
-    public static function extra(array $array)
+    public static function extra(array $array): void
     {
         foreach ($array as $k => $v) {
             self::$data[$k] = $v;
@@ -54,6 +54,9 @@ class Response
     {
         return json_encode(null !== $data ? $data : (!empty(self::$data) ? self::$data : new \stdClass), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION);
     }
+    /**
+     * @return never
+     */
     public static function response(mixed $data = null)
     {
         self::header();

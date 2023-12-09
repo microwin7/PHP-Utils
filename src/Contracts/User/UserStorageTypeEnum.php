@@ -17,4 +17,9 @@ enum UserStorageTypeEnum: int implements JsonSerializable, EnumInterface
     case DB_USER_ID   = 2;
     case DB_SHA1      = 3;
     case DB_SHA256    = 4;
+
+    public static function getNameVariable(): string
+    {
+        return 'userStorageType';
+    }
 }

@@ -12,17 +12,26 @@ class Data
     {
         return $_SERVER['QUERY_STRING'];
     }
-    public static function getDataFromUrl($url): string|false
+    public static function getDataFromUrl(string $url): string|false
     {
         $data = file_get_contents($url, false, stream_context_create(['http' => ['ignore_errors' => true]]));
         $headers = self::parseHeaders($http_response_header);
         if ($headers['reponse_code'] != 200) return false;
         return $data;
     }
-    public static function parseHeaders($headers)
+    /**
+     * @param string[] $headers
+     *
+     * @psalm-param non-empty-list<non-falsy-string> $headers
+     *
+     * @return (int|string)[]
+     *
+     * @psalm-return array<int<0, max>|string, int|string>
+     */
+    public static function parseHeaders(array $headers): array
     {
         $head = [];
-        foreach ($headers as $key => $value) {
+        foreach ($headers as $value) {
             $t = explode(':', $value, 2);
             if (isset($t[1]))
                 $head[trim($t[0])] = trim($t[1]);

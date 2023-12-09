@@ -56,7 +56,10 @@ class ResponseConstructor
         $this->code_response($code_response);
         $this->response();
     }
-    private function json_encode()
+    /**
+     * @return false|string
+     */
+    private function json_encode(): string|false
     {
         return json_encode((object)$this->data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION);
     }

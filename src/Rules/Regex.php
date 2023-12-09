@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Microwin7\PHPUtils\Rules;
 
 class Regex
@@ -19,21 +21,21 @@ class Regex
 
     public static function valid_with_pattern(string $string, string $pattern): bool
     {
-        return preg_match($pattern, $string, $varR);
+        return empty($pattern) ? false : (bool)preg_match($pattern, $string, $varR);
     }
     public static function valid_username(string $string): bool
     {
-        return preg_match(self::USERNAME, $string, $varR);
+        return (bool)preg_match(self::USERNAME, $string, $varR);
     }
     public static function valid_uuid(string $string): bool
     {
-        return preg_match(self::UUIDv1_AND_v4, $string, $varR);
+        return (bool)preg_match(self::UUIDv1_AND_v4, $string, $varR);
     }
     public static function valid_uuid_no_dash(string $string): bool
     {
-        return preg_match(self::UUID_NO_DASH, str_replace('-', '', $string), $varR);
+        return (bool)preg_match(self::UUID_NO_DASH, str_replace('-', '', $string), $varR);
     }
-    public static function contains(string $haystack, string $needle)
+    public static function contains(string $haystack, string $needle): bool
     {
         return strpos($haystack, $needle) !== false;
     }

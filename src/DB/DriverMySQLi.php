@@ -7,15 +7,15 @@ use Microwin7\PHPUtils\Configs\MainConfig;
 
 class DriverMySQLi
 {
-	private $mysqli;
+	private \mysqli $mysqli;
 	private \mysqli_result|false $last_result;
-	private $sql = '';
-	private $table_prefix;
-	private $insert_id;
-	private $database;
+	private string $sql = '';
+	private string $table_prefix;
+	private int|string|null $insert_id;
+	private string $database;
 	private DebugDB $debug;
 
-	public function __construct($database = MainConfig::DB_NAME, $table_prefix = '')
+	public function __construct(string $database = MainConfig::DB_NAME, string $table_prefix = '')
 	{
 		$this->table_prefix = $table_prefix;
 		$this->database = $database;
@@ -28,22 +28,22 @@ class DriverMySQLi
 	{
 		$this->close();
 	}
-	private function close()
+	private function close(): void
 	{
 		if (!is_null($this->mysqli)) {
 			$this->mysqli->close();
 		}
 	}
-	private function table($table)
+	private function table(string $table): string
 	{
 		return $this->table_prefix . $table . ' ';
 	}
-	public function update($table)
+	public function update(string $table): static
 	{
 		$this->sql = "UPDATE " . $this->table($table);
 		return $this;
 	}
-	public function query($sql, $param_type = "", ...$params)
+	public function query(string $sql, string $param_type = "", ...$params): static
 	{
 		$sql = $this->sql . $sql;
 		$this->sql = null;
@@ -147,7 +147,7 @@ class DriverMySQLi
 		}
 		return $array;
 	}
-	public function id(): int|string
+	public function id(): int|string|null
 	{
 		return $this->insert_id;
 	}

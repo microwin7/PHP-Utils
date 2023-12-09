@@ -8,5 +8,4 @@ interface EnumRequestInterface
 {
     public static function getDefault(): static;
     public static function getNameRequestVariable(): string;
-    public static function getNameVariable(): string;
 }

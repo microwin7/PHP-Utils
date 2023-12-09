@@ -11,9 +11,9 @@ class PHPass
     /**
      * @return bool
      * 
-     * @throws \Microwin7\PHPUtils\Exceptions\NumberFormatException
+     * @throws NumberFormatException
      */
-    public static function phpass_validation($password, $encryptedPassword): bool
+    public static function phpass_validation(string $password, string $encryptedPassword): bool
     {
         $id = substr($encryptedPassword, 0, 3);
         $entry = strpos(self::PHPASS_ITOA64, $encryptedPassword[3]);
@@ -29,9 +29,9 @@ class PHPass
         do {
             $hash_new = md5($hash_new . $password, TRUE);
         } while (--$count);
-        return self::enc64($hash_new, 16) === $hash;
+        return self::enc64($hash_new) === $hash;
     }
-    private static function enc64($input, $count): string
+    private static function enc64(string $input, int $count = 16): string
     {
         $itoa64 = self::PHPASS_ITOA64;
         $output = '';

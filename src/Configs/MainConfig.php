@@ -40,11 +40,12 @@ class MainConfig
     public const bool SENTRY_ENABLE = false;
     public const string SENTRY_DSN = '';
 
+    /** @var array<string, array<string, mixed>> */
     public const array SERVERS = [
         'имя1' => [         // Сервера с именем бд всегда в нижнем регистре, префикс для серверов 'server_' полное имя бд: 'server_имя1'
             'alias' => ['алиас_имя1'], // Алиасы имён сервера, по которым будет вызвано основное имя для подключение к бд
             'host' => '127.0.0.1',
-            'port' => '25565',
+            'port' => 25565,
             'rcon' => [
                 'enable' => true,
                 'password' => '',
@@ -54,7 +55,7 @@ class MainConfig
         'имя2' => [
             'alias' => ['алиас_имя2', 'алиас2_имя2'],
             'host' => '127.0.0.1',
-            'port' => '25566',
+            'port' => 25566,
             'rcon' => [
                 'enable' => false,
                 'password' => '',

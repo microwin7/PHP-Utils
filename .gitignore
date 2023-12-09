@@ -1,2 +1,6 @@
 /vendor/
 composer.lock
+# Psalm
+log.txt
+log_no_color.txt
+psalm.sh

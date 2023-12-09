@@ -8,7 +8,7 @@ use Microwin7\PHPUtils\Exceptions\ServerNotFoundException;
 
 class Connector
 {
-    protected $database = [];
+    protected array $database = [];
 
     public function __get($database): DriverPDO|DriverMySQLi
     {

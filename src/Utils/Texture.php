@@ -34,7 +34,7 @@ class Texture
      * Получение ссылки пути хранения скина/плаща с указанием вызываемого типа
      *
      * @param string $login
-     * @param key-of<\Microwin7\PHPUtils\Configs\TextureConfig::TEXTURE_PATH> $type Допустимые параметры: <SKIN|CAPE>
+     * @param key-of<TextureConfig::TEXTURE_PATH> $type Допустимые параметры: <SKIN|CAPE>
      * @return string
      */
     public static function getTexturePath(string $login, string $type): string
@@ -51,9 +51,7 @@ class Texture
         return str_ends_with_slash(TextureConfig::CAPE_PATH);
     }
     /**
-     * Undocumented function
-     *
-     * @param key-of<\Microwin7\PHPUtils\Configs\TextureConfig::TEXTURE_PATH> $type
+     * @param key-of<TextureConfig::TEXTURE_PATH> $type
      * @return string
      */
     public static function getTexturePathStorage(string $type): string
@@ -74,14 +72,12 @@ class Texture
             $login . self::EXT();
     }
     /**
-     * Undocumented function
-     *
      * @param int $width
      * @param int $height
-     * @param key-of<\Microwin7\PHPUtils\Configs\TextureConfig::SIZE> $type
+     * @param key-of<TextureConfig::SIZE> $type
      * @return true
      * 
-     * @throws \Microwin7\PHPUtils\Exceptions\TextureSizeException
+     * @throws TextureSizeException
      */
     public static function validateSize(int $width, int $height, string $type): true
     {
@@ -94,14 +90,12 @@ class Texture
         return $valid_size ?: throw new TextureSizeException;
     }
     /**
-     * Undocumented function
-     *
      * @param int $width
      * @param int $height
-     * @param key-of<\Microwin7\PHPUtils\Configs\TextureConfig::SIZE_WITH_HD> $type
+     * @param key-of<TextureConfig::SIZE_WITH_HD> $type
      * @return true
      * 
-     * @throws \Microwin7\PHPUtils\Exceptions\TextureSizeHDException
+     * @throws TextureSizeHDException
      */
     public static function validateHDSize(int $width, int $height, string $type): true
     {
@@ -113,11 +107,16 @@ class Texture
         }
         return $valid_size ?: throw new TextureSizeHDException;
     }
+    /**
+     * @return string
+     *
+     * @psalm-return ''|'.png'
+     */
     public static function EXT(): string
     {
-        return empty(TextureConfig::EXT) ?: '.' . TextureConfig::EXT;
+        return empty(TextureConfig::EXT) ? '' : '.' . TextureConfig::EXT;
     }
-    public static function digest($data): string
+    public static function digest(string $data): string
     {
         return hash('sha256', $data);
     }

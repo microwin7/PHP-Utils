@@ -11,12 +11,11 @@ use Microwin7\PHPUtils\Exceptions\ServerNotSelected;
 
 class Rcon
 {
-    protected $server;
+    /** @var key-of<MainConfig::SERVERS>|string $server */
+    protected string $server = '';
 
     /**
-     * Undocumented function
-     *
-     * @param string $server_name
+     * @param key-of<MainConfig::SERVERS>|string $server_name
      * @return $this
      */
     public function selectServer(string $server_name): static
@@ -25,14 +24,12 @@ class Rcon
         return $this;
     }
     /**
-     * Undocumented function
-     *
      * @param string $command
      * @param string $username
      * @param boolean $check_correct_server
      * @return void
      * 
-     * @throws \Microwin7\PHPUtils\Exceptions\RconConnectException
+     * @throws RconConnectException
      */
     public function sendRconCommand(string $command, $username = '', $check_correct_server = true): void
     {
@@ -49,34 +46,28 @@ class Rcon
         $rcon->disconnect();
     }
     /**
-     * Undocumented function
-     *
      * @return void
      * 
-     * @throws \Microwin7\PHPUtils\Exceptions\ServerNotSelected
+     * @throws ServerNotSelected
      */
     private function checkEmptyServer(): void
     {
         if (empty($this->server)) throw new ServerNotSelected;
     }
     /**
-     * Undocumented function
-     *
      * @return void
      * 
-     * @throws \Microwin7\PHPUtils\Exceptions\SolutionDisabledException
+     * @throws SolutionDisabledException
      */
     private function checkServer(): void
     {
         if (!@MainConfig::SERVERS[Main::getCorrectServer($this->server)]['rcon']['enable']) throw new SolutionDisabledException;
     }
     /**
-     * Undocumented function
-     *
      * @param string $username
      * @return void
      * 
-     * @throws \Microwin7\PHPUtils\Exceptions\RequiredArgumentMissingException
+     * @throws RequiredArgumentMissingException
      */
     public function teleportToSpawn(string $username): void
     {
@@ -84,8 +75,6 @@ class Rcon
         $this->sendRconCommand('otp', $username);
     }
     /**
-     * Undocumented function
-     *
      * @param string $command
      * @return array
      */

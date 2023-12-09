@@ -9,7 +9,7 @@ use Microwin7\PHPUtils\Exceptions\ServerNotFoundException;
 class SingletonConnector
 {
 
-    private static $database = [];
+    private static array $database = [];
 
     public function __get(string $database): DriverPDO|DriverMySQLi
     {
@@ -30,13 +30,13 @@ class SingletonConnector
     /**
      * Singletons should not be restorable from strings.
      * 
-     * @throws Exception
+     * @throws \Exception
      */
     public function __wakeup()
     {
         throw new \Exception("Cannot unserialize a singleton.");
     }
-    private static function getConnect($database)
+    private static function getConnect(string $database)
     {
         if (empty($database) || $database == MainConfig::DB_NAME) $database = MainConfig::DB_NAME;
         else {

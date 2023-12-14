@@ -2,6 +2,10 @@
 
 namespace Microwin7\PHPUtils\Configs;
 
+/** 
+ * Use only from WWW Request
+ * @psalm-suppress PossiblyUndefinedArrayOffset
+ */
 define("DOCUMENT_ROOT", $_SERVER['DOCUMENT_ROOT'] . '/');
 
 class PathConfig

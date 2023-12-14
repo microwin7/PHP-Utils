@@ -8,7 +8,6 @@ trait EnumTrait
 {
     /**
      * @return array<int|string, string>
-     * @psalm-suppress InvalidReturnType
      */
     public static function getCases(): array
     {

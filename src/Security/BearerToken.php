@@ -26,8 +26,16 @@ class BearerToken
      */
     public static function getBearer(): string
     {
-        return substr(@array_change_key_case(getallheaders())['authorization']  ?? '', 7);
+        $headers = array_change_key_case(getallheaders());
+        /** @var string */
+        $authorizationHeader = $headers['authorization'] ?? '';
+
+        if (strlen($authorizationHeader) >= 7) {
+            return substr($authorizationHeader, 7);
+        }
+        return '';
     }
+
     public static function validateBearer(): bool
     {
         return static::getBearerToken() === MainConfig::BEARER_TOKEN;
@@ -48,7 +56,7 @@ class BearerToken
             $requestHeaders = apache_request_headers();
             // Server-side fix for bug in old Android versions (a nice side-effect of this fix means we don't care about capitalization for Authorization)
             $requestHeaders = array_combine(array_map('ucwords', array_keys($requestHeaders)), array_values($requestHeaders));
-            //print_r($requestHeaders);
+            /** @var string $requestHeaders['Authorization'] */
             if (isset($requestHeaders['Authorization'])) {
                 $headers = trim($requestHeaders['Authorization']);
             }

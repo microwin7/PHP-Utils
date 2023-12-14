@@ -7,9 +7,7 @@ use Microwin7\PHPUtils\Response\JsonResponse;
 class Regex
 {
     private $data;
-    /**
-     * @var string[]
-     */
+    /** @var string[] */
     private array $pattern = [];
     private string $last_name = '';
     private string|null $last_data = null;
@@ -65,11 +63,7 @@ class Regex
         $this->pattern = [];
         return $this;
     }
-
-    /**
-     * @return never
-     */
-    private function reply()
+    private function reply(): never
     {
         JsonResponse::failed('[' . $this->last_name . '] ' . ($this->last_data ?? 'NULL') . ' - значение не прошло проверку');
     }

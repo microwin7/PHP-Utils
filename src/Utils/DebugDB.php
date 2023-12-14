@@ -7,9 +7,6 @@ use Microwin7\PHPUtils\Configs\PathConfig;
 
 class DebugDB
 {
-	/**
-	 * @psalm-param 'debug'|'debug_error' $path
-	 */
 	private function file_put_contents(string $path, string $message): void
 	{
 		$directory = PathConfig::DB_LOG_FOLDER;
@@ -23,14 +20,17 @@ class DebugDB
 	}
 	public function debug(string $message): void
 	{
+		/** @psalm-suppress RedundantCondition */
 		if (MainConfig::DB_DEBUG) $this->file_put_contents(__FUNCTION__, $message);
 	}
 	public function debug_error(string $message): void
 	{
+		/** @psalm-suppress RedundantCondition */
 		if (MainConfig::DB_DEBUG) $this->file_put_contents(__FUNCTION__, $message);
 	}
 	public function debug_extra(string $message, string $folder= 'extra'): void
     {
+		/** @psalm-suppress RedundantCondition */
 		if (MainConfig::DB_DEBUG) $this->file_put_contents($folder, $message);
 	}
 }

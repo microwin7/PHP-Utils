@@ -8,19 +8,22 @@ use Microwin7\PHPUtils\Exceptions\ServerNotFoundException;
 
 class Connector
 {
+    /** @var array<string, DriverPDO|DriverMySQLi> */
     protected array $database = [];
 
-    public function __get($database): DriverPDO|DriverMySQLi
+    public function __get(string $database): DriverPDO|DriverMySQLi
     {
         if (array_key_exists($database, $this->database)) return $this->database[$database];
         return $this->getConnect($database);
     }
 
-    private function getConnect($database)
+    private function getConnect(string $database): DriverPDO|DriverMySQLi
     {
+        $module = [];
         if (empty($database) || $database == MainConfig::DB_NAME) $database = MainConfig::DB_NAME;
         else {
             try {
+                /** @psalm-suppress RedundantFunctionCall */
                 $database = strtolower(MainConfig::DB_PREFIX . Main::getServerWithoutDefault($database));
             } catch (ServerNotFoundException $e) {
                 $modules_keys_lower_case = array_change_key_case(MainConfig::MODULES);
@@ -34,6 +37,10 @@ class Connector
             }
         }
         if (array_key_exists($database, $this->database)) return $this->database[$database];
+        /**
+         * @var string $module['prefix']
+         * @psalm-suppress TypeDoesNotContainType
+         */
         return $this->database[$database] = match (MainConfig::DB_DRIVER) {
             DriverTypeEnum::MySQLi => new DriverMySQLi($database, $module['prefix'] ?? ''),
             DriverTypeEnum::PDO => new DriverPDO($database, $module['prefix'] ?? ''),

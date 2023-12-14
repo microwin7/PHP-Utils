@@ -2,8 +2,6 @@
 
 namespace Microwin7\PHPUtils;
 
-use Microwin7\PHPUtils\Contracts\Enum\EnumRequestInterface;
-
 if (!function_exists('str_starts_with_slash')) {
     function str_starts_with_slash(string $string, bool $needle_starts_with_slash = FALSE): string
     {
@@ -33,7 +31,12 @@ if (!function_exists('ar_slash_string')) {
     }
 }
 if (!function_exists('implodeRecursive')) {
-    function implodeRecursive($separator, array $array)
+    /**
+     * @param string $separator
+     * @param string[]|array<array-key, string|array<array-key, string>> $array
+     * @return string
+     */
+    function implodeRecursive(string $separator, array $array): string
     {
         $result = '';
         foreach ($array as $value) {
@@ -44,8 +47,14 @@ if (!function_exists('implodeRecursive')) {
                     $result .= $value . $separator;
                 } else if (enum_exists($value)) {
                     $argumentClazz = new \ReflectionClass($value);
-                    if ($argumentClazz->implementsInterface(EnumRequestInterface::class)) {
-                        /** @var \BackedEnum & EnumInterface & EnumRequestInterface $enumClass */
+                    if ($argumentClazz->implementsInterface(\Microwin7\PHPUtils\Contracts\Enum\EnumRequestInterface::class)) {
+                        /** 
+                         * @var interface-string<
+                         *     \BackedEnum & 
+                         *     \Microwin7\PHPUtils\Contracts\Enum\EnumInterface & 
+                         *     \Microwin7\PHPUtils\Contracts\Enum\EnumRequestInterface
+                         * > $enumClass 
+                         */
                         $enumClass = $value;
                         $result .= $enumClass::getNameRequestVariable() . $separator;
                     }
@@ -53,9 +62,67 @@ if (!function_exists('implodeRecursive')) {
             }
         }
 
-        // Удаляем последний разделитель
-        $result = rtrim($result, $separator);
-
-        return $result;
+        return rtrim($result, $separator);
+    }
+}
+if (!function_exists('getClassMethodsAllFromDocComment')) {
+    /**
+     * @param class-string|object|trait-string $class
+     * 
+     * @return string[]|null
+     */
+    function getClassMethodsAllFromDocComment(string|object $class): ?array
+    {
+        $reflectionClass = new \ReflectionClass($class);
+        $docComment = $reflectionClass->getDocComment();
+        if ($docComment !== false) {
+            preg_match_all('/@method\s+([^\r\n\t\f\v(]+)/', $docComment, $matches);
+            if (!empty($matches[1])) {
+                return $matches[1];
+            }
+        }
+        return null;
+    }
+}
+if (!function_exists('getClassMethodsFromAnnotations')) {
+    /**
+     * @param class-string|object|trait-string $class
+     * 
+     * @return string[]
+     */
+    function getClassMethodsFromAnnotations(string|object $class): array
+    {
+        $annotations = [];
+        $methodsDocComment = getClassMethodsAllFromDocComment($class);
+        if ($methodsDocComment !== null) {
+            foreach ($methodsDocComment as $v) {
+                $methodComment = explode(" ", $v);
+                if (count($methodComment) === 2) {
+                    $annotations[] = $methodComment[1];
+                }
+            }
+        }
+        return $annotations;
+    }
+}
+if (!function_exists('getClassStaticMethodsFromAnnotations')) {
+    /**
+     * @param class-string|object|trait-string $class
+     * 
+     * @return array<array-key, object{ 'name': string, 'type': string }>
+     */
+    function getClassStaticMethodsFromAnnotations(string|object $class): array
+    {
+        $annotations = [];
+        $methodsDocComment = getClassMethodsAllFromDocComment($class);
+        if ($methodsDocComment !== null) {
+            foreach ($methodsDocComment as $v) {
+                $methodComment = explode(" ", $v);
+                if (count($methodComment) === 3 && $methodComment[0] === 'static') {
+                    $annotations[] = (object) ['name' => $methodComment[2], 'type' => $methodComment[1]];
+                }
+            }
+        }
+        return $annotations;
     }
 }

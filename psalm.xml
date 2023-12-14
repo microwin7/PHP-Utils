@@ -16,6 +16,7 @@
     </projectFiles>
     <issueHandlers>
         <PossiblyUnusedMethod errorLevel="suppress" />
+        <PossiblyUnusedReturnValue errorLevel="suppress" />
         <MixedArgumentTypeCoercion errorLevel="suppress" />
         <MixedOperand errorLevel="suppress" />
         <UnusedClass errorLevel="suppress" />

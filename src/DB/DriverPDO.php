@@ -9,10 +9,11 @@ class DriverPDO
 {
     private \PDO $DBH;
     private string $DSN;
+    /** @psalm-suppress PropertyNotSetInConstructor */
     private \PDOStatement $STH;
     private string $sql = '';
     private string $table_prefix;
-    private int|string|null $insert_id;
+    private int|string|null $insert_id = null;
     private string $database;
     private DebugDB $debug;
 
@@ -26,13 +27,14 @@ class DriverPDO
             $this->DBH = new \PDO($this->DSN, MainConfig::DB_USER, MainConfig::DB_PASS, MainConfig::DB_PDO_OPTIONS);
             $this->preConnectionExec();
         } catch (\PDOException $e) {
-            $this->debug->debug_error("[{$this->database}] Connection ERROR: [CODE: " . $e->errorInfo[1]  . " | MESSAGE: " . $e->errorInfo[2] . " ]");
+            $this->debug->debug_error("[{$this->database}] Connection ERROR: [CODE: " . ($e->errorInfo[1] ?? 'NULL')  . " | MESSAGE: " . ($e->errorInfo[2] ?? 'NULL') . " ]");
             exit('PDO Connection ERROR');
         }
     }
     private function generateDSN(): void
     {
         $this->DSN = MainConfig::DB_SUD_DB->value . ':host=' . MainConfig::DB_HOST . ';port=' . MainConfig::DB_PORT . ';dbname=' . $this->database;
+        /** @psalm-suppress TypeDoesNotContainType */
         $this->DSN .= match (MainConfig::DB_SUD_DB) {
             SubDBTypeEnum::MySQL =>  ';charset=utf8mb4',
             SubDBTypeEnum::PostgreSQL => '',
@@ -40,6 +42,7 @@ class DriverPDO
     }
     private function preConnectionExec(): void
     {
+        /** @psalm-suppress TypeDoesNotContainType */
         match (MainConfig::DB_SUD_DB) {
             SubDBTypeEnum::MySQL => null, //$this->DBH->exec("set session wait_timeout = 3600; set session interactive_timeout = 3600;")
             SubDBTypeEnum::PostgreSQL => null,
@@ -52,15 +55,18 @@ class DriverPDO
     {
         return $this->table_prefix . $table . ' ';
     }
+    /** @deprecated */
     public function update(string $table): static
     {
         $this->sql = "UPDATE " . $this->table($table);
         return $this;
     }
     /**
-     * @psalm-return array<never, never>
+     * @param mixed &...$arr
+     * 
+     * @return mixed[]
      */
-    private function refValues(...$arr): array
+    private function refValues(&...$arr): array
     {
         $refs = [];
         foreach ($arr as $key => $_) {
@@ -69,31 +75,33 @@ class DriverPDO
         return $refs;
     }
 
-    private function bind_param(string $param_type, ...$params): void
+    /** @psalm-suppress MissingParamType */
+    private function bind_param(string $param_type, &...$params): void
     {
         if (!empty($params)) {
-            if (!empty($param_type) && is_string($param_type)) {
+            if (!empty($param_type)) {
                 $arr = $this->refValues(...$params);
                 $param_id = 1;
                 foreach (str_split($param_type) as $var_type) {
                     match ($var_type) {
-                        's' => $this->STH->bindValue($param_id, $arr[$param_id - 1], \PDO::PARAM_STR),
-                        'i' => $this->STH->bindValue($param_id, $arr[$param_id - 1], \PDO::PARAM_INT),
-                        'b' => $this->STH->bindValue($param_id, $arr[$param_id - 1], \PDO::PARAM_BOOL),
-                        'n' => $this->STH->bindValue($param_id, $arr[$param_id - 1], \PDO::PARAM_NULL),
-                        'l' => $this->STH->bindValue($param_id, $arr[$param_id - 1], \PDO::PARAM_LOB),
-                        'c' => $this->STH->bindValue($param_id, $arr[$param_id - 1], \PDO::PARAM_STR_CHAR),
-                        default => $this->STH->bindValue($param_id, $arr[$param_id - 1], \PDO::PARAM_STR)
+                        's' => $this->STH->bindParam($param_id, $arr[$param_id - 1], \PDO::PARAM_STR),
+                        'i' => $this->STH->bindParam($param_id, $arr[$param_id - 1], \PDO::PARAM_INT),
+                        'b' => $this->STH->bindParam($param_id, $arr[$param_id - 1], \PDO::PARAM_BOOL),
+                        'n' => $this->STH->bindParam($param_id, $arr[$param_id - 1], \PDO::PARAM_NULL),
+                        'l' => $this->STH->bindParam($param_id, $arr[$param_id - 1], \PDO::PARAM_LOB),
+                        'c' => $this->STH->bindParam($param_id, $arr[$param_id - 1], \PDO::PARAM_STR_CHAR),
+                        default => $this->STH->bindParam($param_id, $arr[$param_id - 1], \PDO::PARAM_STR)
                     };
                     $param_id++;
                 }
             }
         }
     }
-    public function query(string $sql, string $param_type = "", ...$params): static
+
+    public function query(string $sql, string $param_type = "", &...$params): static
     {
         $sql = $this->sql . $sql;
-        $this->sql = null;
+        $this->sql = '';
         $this->insert_id = null;
         $this->debug->debug($param_type ?
             "[{$this->database}] Executing query: $sql with params:\n$param_type -> " . implode(', ', $params) :
@@ -124,6 +132,18 @@ class DriverPDO
         }
         return $this;
     }
+
+    // public function execute(){
+    //     try {
+    //         $this->STH->execute();
+    //     } catch (\PDOException $e) {
+    //         $this->debug->debug_error($param_type ?
+    //             "[{$this->database}] Statement execution error: {$e}\n$sql with params:\n$param_type -> " . implode(', ', $params) :
+    //             "[{$this->database}] Statement execution error: {$e}\n$sql");
+    //         exit('SQL query error');
+    //     }
+    // }
+
     public function getStatementHandler(): \PDOStatement
     {
         return $this->STH;
@@ -134,7 +154,7 @@ class DriverPDO
         return $this->array();
     }
     // Возвращаемое значение, единственное
-    public function value(): null|int|float|string|false
+    public function value(): mixed
     {
         $value = $this->row();
         return false === $value ? $value : $value[0];
@@ -150,7 +170,7 @@ class DriverPDO
         return $this->STH->fetch(\PDO::FETCH_ASSOC);
     }
     // Значение из конкретной колонки, по умолчанию первой
-    public function column(int $column = 0): null|int|float|string|false
+    public function column(int $column = 0): mixed
     {
         $value = $this->row();
         return false === $value ? $value : $value[$column];
@@ -166,7 +186,13 @@ class DriverPDO
         return $this->STH->fetchAll();
     }
     // Объект одной строки
-    public function obj(string $class = "stdClass", array $constructor_args = []): object|null|false
+    /**
+     * @template T of object
+     * @param class-string<T> $class
+     * @param array $constructor_args Аргументы для конструктора передаваемого класса, для заполнения
+     * @return T|null Возвращает объект с параметрами класса как в БД и заполненными добавочными данными из аргументов констркутора класса
+     */
+    public function obj($class = \stdClass::class, array $constructor_args = [])
     {
         return $this->STH->fetchObject($class, $constructor_args);
     }

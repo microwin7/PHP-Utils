@@ -24,6 +24,7 @@ class PHPass
         if ($entry < 7 || $entry > 30) {
             // Восстановить при необходимости
         }
+        /** @psalm-suppress PossiblyFalseOperand */
         $count = 1 << $entry;
         $hash_new = md5($salt . $password, TRUE);
         do {

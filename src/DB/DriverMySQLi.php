@@ -8,10 +8,11 @@ use Microwin7\PHPUtils\Configs\MainConfig;
 class DriverMySQLi
 {
 	private \mysqli $mysqli;
+	/** @psalm-suppress PropertyNotSetInConstructor */
 	private \mysqli_result|false $last_result;
 	private string $sql = '';
 	private string $table_prefix;
-	private int|string|null $insert_id;
+	private int|string|null $insert_id = null;
 	private string $database;
 	private DebugDB $debug;
 
@@ -20,7 +21,7 @@ class DriverMySQLi
 		$this->table_prefix = $table_prefix;
 		$this->database = $database;
 		$this->debug = new DebugDB;
-		$this->mysqli = new \mysqli(MainConfig::DB_HOST, MainConfig::DB_USER, MainConfig::DB_PASS, $database, MainConfig::DB_PORT);
+		$this->mysqli = new \mysqli(MainConfig::DB_HOST, MainConfig::DB_USER, MainConfig::DB_PASS, $database, (int)MainConfig::DB_PORT);
 		if ($this->mysqli->connect_errno) $this->debug->debug("Connect error: {$this->mysqli->connect_error}");
 		$this->mysqli->set_charset("utf8");
 	}
@@ -30,6 +31,7 @@ class DriverMySQLi
 	}
 	private function close(): void
 	{
+		/** @psalm-suppress RedundantCondition */
 		if (!is_null($this->mysqli)) {
 			$this->mysqli->close();
 		}
@@ -38,6 +40,7 @@ class DriverMySQLi
 	{
 		return $this->table_prefix . $table . ' ';
 	}
+	/** @deprecated */
 	public function update(string $table): static
 	{
 		$this->sql = "UPDATE " . $this->table($table);
@@ -46,7 +49,7 @@ class DriverMySQLi
 	public function query(string $sql, string $param_type = "", ...$params): static
 	{
 		$sql = $this->sql . $sql;
-		$this->sql = null;
+		$this->sql = '';
 		$this->insert_id = null;
 		$this->debug->debug($param_type ?
 			"[{$this->database}] Executing query: $sql with params:\n$param_type -> " . implode(', ', $params) :
@@ -73,6 +76,7 @@ class DriverMySQLi
 				"[{$this->database}] Statement execution error: {$this->mysqli->error}\n$sql");
 			exit('MySQL query error');
 		}
+		// Возвращается false если запрос был подготовленным выражением, например UPDATE, INSERT или DELETE
 		$this->last_result = $stmt->get_result();
 		$this->insert_id = @$stmt->insert_id;
 		$stmt->close();
@@ -84,7 +88,7 @@ class DriverMySQLi
 	}
 
 	// Возвращаемое значение, единственное
-	public function value(): null|int|float|string|false
+	public function value(): mixed
 	{
 		return $this->column();
 	}
@@ -101,31 +105,33 @@ class DriverMySQLi
 		return $this->last_result->fetch_assoc();
 	}
 	// Значение из конкретной колонки, по умолчанию первой
-	public function column(int $column = 0): null|int|float|string|false
+	public function column(int $column = 0): mixed
 	{
 		if ($this->last_result === false) return $this->last_result;
 		return $this->last_result->fetch_column($column);
 	}
 	// Ассоциативный массив всех строк ответа
-	public function array(): array|null|false
+	public function array(): array|false
 	{
-		if ($this->last_result === null || $this->last_result === false) return $this->last_result;
-		$array = [];
-		foreach ($this->last_result as $item) {
-			$array[] = $item;
-		}
-		return $array;
+		if ($this->last_result === false) return $this->last_result;
+		return $this->last_result->fetch_all(MYSQLI_ASSOC);
 	}
 	// Индексированный и Ассоциативный массив всех строк ответа
 	public function all(): array|null|false
 	{
-		if ($this->last_result === null || $this->last_result === false) return $this->last_result;
+		if ($this->last_result === false) return $this->last_result;
 		return $this->last_result->fetch_all(MYSQLI_BOTH);
 	}
 	// Объект одной строки
-	public function obj(string $class = "stdClass", array $constructor_args = []): object|null|false
+	/**
+	 * @template T of object
+	 * @param class-string<T> $class
+	 * @param array $constructor_args Аргументы для конструктора передаваемого класса, для заполнения
+	 * @return T|null Возвращает объект с параметрами класса как в БД и заполненными добавочными данными из аргументов констркутора класса
+	 */
+	public function obj($class = \stdClass::class, array $constructor_args = []): object|null
 	{
-		if ($this->last_result === null || $this->last_result === false) return $this->last_result;
+		if ($this->last_result === false) return null;
 		return $this->last_result->fetch_object($class, $constructor_args);
 	}
 	/**
@@ -139,11 +145,19 @@ class DriverMySQLi
 		return $this->objects();
 	}
 	// Индексированный массив объектов результата
-	public function objects(string $class = "stdClass", array $constructor_args = []): array
+	/**
+	 * @template T of object
+	 * @param class-string<T> $class
+	 * @param array $constructor_args Аргументы для конструктора передаваемого класса, для заполнения
+	 * @return array<array-key, T> Возвращает объект с параметрами класса как в БД и заполненными добавочными данными из аргументов констркутора класса
+	 */
+	public function objects(string $class = \stdClass::class, array $constructor_args = []): array
 	{
 		$array = [];
-		while ($obj = $this->last_result->fetch_object($class, $constructor_args)) {
-			$array[] = $obj;
+		if ($this->last_result !== false) {
+			while ($obj = $this->last_result->fetch_object($class, $constructor_args)) {
+				$array[] = $obj;
+			}
 		}
 		return $array;
 	}

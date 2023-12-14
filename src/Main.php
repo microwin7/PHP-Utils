@@ -12,7 +12,7 @@ class Main extends MainConfig
      * Поиск и возвращение имени сервера, если оно есть в алиас или главном имени, возвращает главное имя. Если сервер не найден, возвращает {@link \Microwin7\PHPUtils\Exceptions\ServerNotFoundException}
      *
      * @param string $server_name Принимает имя сервера, по которому будет произведён поиск основного имени сервера
-     * @return string Найденное имя сервера с учётом регистра, либо исключение
+     * @return key-of<MainConfig::SERVERS> Найденное имя сервера с учётом регистра, либо исключение
      * 
      * @throws ServerNotFoundException
      */
@@ -24,9 +24,11 @@ class Main extends MainConfig
             $servers_list[] = $k;
             $alias_list[] = $v['alias'];
         }
+        /** @psalm-suppress RedundantFunctionCall */
         $key = array_search(strtolower($server_name), array_map('strtolower', $servers_list));
         if ($key !== false) return $servers_list[$key];
         foreach ($alias_list as $k => $v) {
+            /** @psalm-suppress RedundantFunctionCall */
             $alias_key = array_search(strtolower($server_name), array_map('strtolower', $v));
             if ($alias_key !== false) return $servers_list[$k];
         }
@@ -60,6 +62,7 @@ class Main extends MainConfig
             $alias_list[] = $v['alias'];
         }
         foreach ($alias_list as $v) {
+            /** @psalm-suppress RedundantFunctionCall */
             $alias_key = array_search(strtolower($server_name), array_map('strtolower', $v));
             if ($alias_key !== false) return $v[$alias_key];
         }

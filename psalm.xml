@@ -16,9 +16,11 @@
     </projectFiles>
     <issueHandlers>
         <PossiblyUnusedMethod errorLevel="suppress" />
+        <PossiblyUnusedProperty errorLevel="suppress" />
         <PossiblyUnusedReturnValue errorLevel="suppress" />
         <MixedArgumentTypeCoercion errorLevel="suppress" />
         <MixedOperand errorLevel="suppress" />
         <UnusedClass errorLevel="suppress" />
+        <UnusedVariable errorLevel="suppress" />
     </issueHandlers>
 </psalm>

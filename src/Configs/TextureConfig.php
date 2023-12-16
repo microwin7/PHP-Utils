@@ -24,6 +24,7 @@ class TextureConfig
     public const string EXT = 'png';
     /**
      * Обвязка для получения по ключу, не менять!!!
+     * @return array<'SKIN': string, 'CAPE': string>
      */
     public const array TEXTURE_PATH = [
         'SKIN' => self::SKIN_PATH,

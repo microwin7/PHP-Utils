@@ -33,7 +33,7 @@ if (!function_exists('ar_slash_string')) {
 if (!function_exists('implodeRecursive')) {
     /**
      * @param string $separator
-     * @param string[]|array<array-key, string|array<array-key, string>> $array
+     * @param string[]|list<string|list<string>> $array
      * @return string
      */
     function implodeRecursive(string $separator, array $array): string
@@ -109,7 +109,7 @@ if (!function_exists('getClassStaticMethodsFromAnnotations')) {
     /**
      * @param class-string|object|trait-string $class
      * 
-     * @return array<array-key, object{ 'name': string, 'type': string }>
+     * @return list<object{'name': string, 'type': string}>
      */
     function getClassStaticMethodsFromAnnotations(string|object $class): array
     {
@@ -124,5 +124,23 @@ if (!function_exists('getClassStaticMethodsFromAnnotations')) {
             }
         }
         return $annotations;
+    }
+}
+if (!function_exists('minifier')) {
+    function minifier(string $code): string
+    {
+        $search = array(
+            // Remove whitespaces after tags
+            '/\>[^\S]+/s',
+            // Remove whitespaces before tags
+            '/[^\S]+\</s',
+            // Remove multiple whitespace sequences
+            '/(\s)+/s',
+            // Removes comments
+            '/<!--(.|\s)*?-->/'
+        );
+        $replace = array('>', '<', '\\1');
+        $code = preg_replace($search, $replace, $code);
+        return $code;
     }
 }

@@ -4,27 +4,33 @@ namespace Microwin7\PHPUtils\Utils;
 
 use Microwin7\PHPUtils\Response\JsonResponse;
 
+/**
+ * Класс предназначен только для закрытых API
+ */
 class Regex
 {
+    /** @var array<string, string|int|float|bool|null> */
     private $data;
     /** @var string[] */
     private array $pattern = [];
     private string $last_name = '';
-    private string|null $last_data = null;
+    /** Параметр второго уровня, значение из массива */
+    private string|int|float|bool|null $last_data = null;
 
-    public function __construct($data)
+    /** @param array<string, string|int|float|bool|null> $data */
+    public function __construct(array $data)
     {
         $this->data = $data;
     }
 
-    public function getData()
+    public function getData(): array
     {
         return $this->data;
     }
     public function name(string $name_data): static
     {
         $this->last_name = $name_data;
-        $this->last_data = $this->data->{$this->last_name};
+        $this->last_data = $this->data[$this->last_name];
         return $this;
     }
     public function pattern(string ...$pattern): static
@@ -55,7 +61,7 @@ class Regex
     private function preg_match(): static
     {
         foreach ($this->pattern as $pattern) {
-            if (!empty($pattern) && $this->last_data !== null && preg_match($pattern, $this->last_data, $v) !== 1) {
+            if (!empty($pattern) && $this->last_data !== null && preg_match($pattern, (string)$this->last_data, $v) !== 1) {
                 $this->pattern = [];
                 $this->reply();
             }

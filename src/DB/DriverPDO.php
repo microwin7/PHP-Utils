@@ -207,8 +207,15 @@ class DriverPDO
         return $this->objects();
     }
     // Индексированный массив объектов результата
-    public function objects(string $class = "stdClass", array $constructor_args = []): array
+    /**
+     * @template T of object
+     * @param class-string<T> $class
+     * @param array $constructor_args Аргументы для конструктора передаваемого класса, для заполнения
+     * @return list<T> Возвращает объект с параметрами класса как в БД и заполненными добавочными данными из аргументов констркутора класса
+     */
+    public function objects(string $class = \stdClass::class, array $constructor_args = []): array
     {
+        /** @var list<T> */
         return $this->STH->fetchAll(\PDO::FETCH_CLASS, $class, $constructor_args);
     }
     public function id(): int|string|null

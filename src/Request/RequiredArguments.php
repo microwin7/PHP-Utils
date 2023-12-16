@@ -3,11 +3,11 @@
 namespace Microwin7\PHPUtils\Request;
 
 use Microwin7\PHPUtils\Attributes\AsArguments;
+use function Microwin7\PHPUtils\implodeRecursive;
 use Microwin7\PHPUtils\Attributes\RegexArguments;
 use Microwin7\PHPUtils\Contracts\Enum\EnumInterface;
 use Microwin7\PHPUtils\Contracts\Enum\EnumRequestInterface;
 use Microwin7\PHPUtils\Exceptions\RequiredArgumentMissingException;
-use function Microwin7\PHPUtils\implodeRecursive;
 
 class RequiredArguments
 {
@@ -60,7 +60,7 @@ class RequiredArguments
             'GET' => $_GET,
             'POST' => $_POST,
             'REQUEST' => $_REQUEST,
-            // 'JSON' => Data::getData(),
+            'JSON' => Data::getData(),
         };
     }
     private function setRequiredArguments(): void
@@ -118,7 +118,8 @@ class RequiredArguments
     private function setVariable(string $argument, bool $optional = false): void
     {
         if (strrpos($argument, '\\') === false) {
-            $this->with($argument, $this->where[$argument] ?? ($optional ? null : throw new RequiredArgumentMissingException($argument)));
+            $whereValue = $this->where[$argument] ?? ($optional ? null : throw new RequiredArgumentMissingException($argument));
+            $this->with($argument, $whereValue);
             if (isset($this->regexArguments[$argument])) $this->validateVariable($argument, $this->regexArguments[$argument]);
         } else if (enum_exists($argument)) {
             $argumentClazz = new \ReflectionClass($argument);
@@ -130,7 +131,7 @@ class RequiredArguments
                 /** @var interface-string<\BackedEnum & EnumInterface & EnumRequestInterface> $enumClass */
                 $enumClass = $argument;
                 try {
-                    $whereValue = $this->where[$enumClass::getNameRequestVariable()];
+                    $whereValue = $this->where[$enumClass::getNameRequestVariable()] ?? throw new RequiredArgumentMissingException('Missing Request variable: ' . $enumClass::getNameRequestVariable());
                     if (is_numeric($whereValue))
                         $this->with($enumClass::getNameVariable(), $enumClass::from((int)$whereValue));
                     elseif (is_string($whereValue))
@@ -151,6 +152,19 @@ class RequiredArguments
     /** @param string|EnumRequestInterface|EnumInterface|\BackedEnum|non-empty-array<int|string, array<int|string, mixed>|string>|null $value */
     private function with(string $property, string|object|array|null $value): void
     {
-        $this->arguments[$property] = $value;
+        if (strrpos($property, '\\') === false) {
+            $this->arguments[$property] = $value;
+        } else if (enum_exists($property)) {
+            $argumentClazz = new \ReflectionClass($property);
+            if (
+                $argumentClazz->implementsInterface(\BackedEnum::class) &&
+                $argumentClazz->implementsInterface(EnumInterface::class) &&
+                $argumentClazz->implementsInterface(EnumRequestInterface::class)
+            ) {
+                /** @var interface-string<\BackedEnum & EnumInterface & EnumRequestInterface> $enumClass */
+                $enumClass = $property;
+                $this->arguments[$enumClass::getNameRequestVariable()] = $value;
+            }
+        } else throw new \ValueError('The with method cannot accept such a variable property key');
     }
 }

@@ -149,7 +149,7 @@ class DriverMySQLi
 	 * @template T of object
 	 * @param class-string<T> $class
 	 * @param array $constructor_args Аргументы для конструктора передаваемого класса, для заполнения
-	 * @return array<array-key, T> Возвращает объект с параметрами класса как в БД и заполненными добавочными данными из аргументов констркутора класса
+	 * @return list<T> Возвращает объекты с параметрами класса как в БД и заполненными добавочными данными из аргументов констркутора класса
 	 */
 	public function objects(string $class = \stdClass::class, array $constructor_args = []): array
 	{

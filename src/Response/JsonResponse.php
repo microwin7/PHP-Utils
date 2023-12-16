@@ -83,29 +83,35 @@ class JsonResponse
         }
         if (!$classFound) throw new NoSuchRequestMethodException();
     }
+    /** @psalm-suppress InvalidReturnType */
     protected static function message(string $message): void
     {
         self::$data['message'] = $message;
     }
+    /** @psalm-suppress InvalidReturnType */
     protected static function error(string $error): void
     {
         self::$data['error'] = $error;
     }
+    /** @psalm-suppress InvalidReturnType */
     protected static function code(int $code): void
     {
         self::$data['code'] = $code;
     }
+    /** @psalm-suppress InvalidReturnType */
     protected static function code_response(int $code_response): void
     {
         http_response_code($code_response);
     }
     /**
      * @param array<int|string, mixed> $array
+     * @psalm-suppress InvalidReturnType
      */
     protected static function extra(array $array): void
     {
         static::$data = array_merge(static::$data, $array);
     }
+    /** @psalm-suppress InvalidReturnType */
     protected static function success(?string $message = null, bool $need_success = false): void
     {
         null === $message ?: self::message($message);
@@ -125,13 +131,14 @@ class JsonResponse
     {
         header("Content-Type: application/json; charset=UTF-8");
     }
-    protected static function json_encode(string|array|object|null $data = null): string|false
+    protected static function json_encode(mixed $data = null): string
     {
-        return json_encode(null !== $data ? $data : (!empty(self::$data) ? self::$data : new \stdClass), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION);
+        return json_encode(null !== $data ? $data : (!empty(self::$data) ? self::$data : new \stdClass), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION)
+            ?: self::json_encode(['error' => 'JSON encoding error']);
     }
     protected static function response(mixed $data = null): never
     {
         self::header();
-        die(self::json_encode(null !== $data ? $data : (!empty(self::$data) ? self::$data : new \stdClass)) ?: self::json_encode(['error' => 'JSON encoding error']));
+        die(self::json_encode($data));
     }
 }

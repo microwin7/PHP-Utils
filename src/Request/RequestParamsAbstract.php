@@ -53,26 +53,30 @@ abstract class RequestParamsAbstract implements RequestParamsInterface
             }
             $this->options[$key] = $value;
         }
-        // $this->options = $options;
         return $this;
     }
     /**
      * @param interface-string<\BackedEnum & EnumInterface & EnumRequestInterface> $enumClass
+     * 
+     * @throws \InvalidArgumentException
+     * @throws \ValueError
      */
-    protected function addEnum(string $enumClass, bool $maybeNull = false): static
+    protected function addEnum(string $enumClass, bool $maybeDefault = false): static
     {
         if (array_key_exists($enumClass::getNameRequestVariable(), $this->options)) {
-
             $optionValueEnum = $this->options[$enumClass::getNameRequestVariable()];
             if (is_numeric($optionValueEnum))
                 return $this->with($enumClass::getNameVariable(), $enumClass::from((int)$optionValueEnum));
             else
                 return $this->with($enumClass::getNameVariable(), $enumClass::fromString($optionValueEnum));
-        } elseif ($maybeNull) {
-            return $this->with($enumClass::getNameVariable(), null);
+        } elseif ($maybeDefault) {
+            return $this->with($enumClass::getNameVariable(), $enumClass::getDefault());
         }
-        return $this->with($enumClass::getNameVariable(), $enumClass::getDefault());
+        throw new \ValueError('Requested parameter: "' . $enumClass::getNameRequestVariable() . '" value cannot be empty');
     }
+    /**
+     * @throws \ValueError
+     */
     protected function addVariable(string $key, string $regexp, bool $maybeNull = false): static
     {
         return array_key_exists($key, $this->options)
@@ -84,8 +88,6 @@ abstract class RequestParamsAbstract implements RequestParamsInterface
      */
     protected function with(string $property, string|object|array|null $value, string|null $regexp = null): static
     {
-        // $clazz = $this ?? new static();
-
         $this->arguments[$property] = $value;
         if ($value !== null && $regexp !== null) $this->validateVariable($property, $regexp);
         return $this;

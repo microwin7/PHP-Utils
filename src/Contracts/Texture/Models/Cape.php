@@ -15,5 +15,4 @@ abstract class Cape implements \JsonSerializable
         public readonly string                          $url
     ) {
     }
-    abstract public static function urlComplete(TextureStorageTypeEnum $textureStorageType, string $url): string;
 }

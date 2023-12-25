@@ -16,5 +16,4 @@ abstract class Skin implements \JsonSerializable
         public readonly bool                            $isSlim,
     ) {
     }
-    abstract public static function urlComplete(TextureStorageTypeEnum $textureStorageType, string $url): string;
 }

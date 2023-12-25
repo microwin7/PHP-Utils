@@ -17,9 +17,9 @@ class GDUtils
         $fraction = imagesx($image) / 8;
         if (is_float($fraction)) throw new \TypeError("Error calculating fraction from \GdImage.");
         /** @var int $x */
-        $x = $fraction / 8 * 6.75;
+        $x = $fraction * 6.75;
         /** @var int $y */
-        $y = $fraction / 8 * 2.5;
+        $y = $fraction * 2.5;
         $rgba = imagecolorsforindex($image, imagecolorat($image, $x, $y));
         if ($rgba["alpha"] === 127)
             return true;

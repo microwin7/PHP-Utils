@@ -33,6 +33,10 @@ abstract class RequestParamsAbstract implements RequestParamsInterface
         }
         return $this->arguments[$name];
     }
+    public function __set(string $name, string $value): void
+    {
+        $this->with($name, $value);
+    }
     /** Валидация только если ключ найден */
     protected function validateVariable(string $key, string $regexp): static
     {
@@ -84,12 +88,28 @@ abstract class RequestParamsAbstract implements RequestParamsInterface
             : ($maybeNull ? $this->with($key, null) : throw new \ValueError('The key: "' . $key . '" value can only be string'));
     }
     /**
+     * @param string|interface-string<\BackedEnum & EnumInterface & EnumRequestInterface> $property
      * @param string|EnumRequestInterface|EnumInterface|\BackedEnum|null $value
      */
-    protected function with(string $property, string|object|array|null $value, string|null $regexp = null): static
+    protected function with(string|null $property, string|object|array|null $value, string|null $regexp = null): static
     {
-        $this->arguments[$property] = $value;
-        if ($value !== null && $regexp !== null) $this->validateVariable($property, $regexp);
+        if ($property !== null && strrpos($property, '\\') === false) {
+            $this->arguments[$property] = $value;
+            if ($value !== null && $regexp !== null) $this->validateVariable($property, $regexp);
+        } else if ($property !== null && enum_exists($property)) {
+            $argumentClazz = new \ReflectionClass($property);
+            if (
+                $argumentClazz->implementsInterface(\BackedEnum::class) &&
+                $argumentClazz->implementsInterface(EnumInterface::class) &&
+                $argumentClazz->implementsInterface(EnumRequestInterface::class)
+            ) {
+                /** @var interface-string<\BackedEnum & EnumInterface & EnumRequestInterface> $enumClass */
+                $enumClass = $property;
+                $this->arguments[$enumClass::getNameRequestVariable()] = $value;
+            }
+        } else if ($value instanceof EnumInterface) {
+            $this->arguments[$value::getNameVariable()] = $value;
+        } else throw new \ValueError('The with method cannot accept such a variable property key');
         return $this;
     }
 }

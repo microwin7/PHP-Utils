@@ -25,7 +25,7 @@ use function Microwin7\PHPUtils\getClassStaticMethodsFromAnnotations;
  * @method static void extra(array $array)
  * @method static void success(?string $message = null, bool $need_success = false)
  * @method static never failed(?string $message = null, ?string $error = null, bool $need_success = false, int $code = 0, int $code_response = 400)
- * @method static string|false json_encode(string|array|object|null $data = null)
+ * @method static string json_encode(mixed $data = null)
  * @method static never response(mixed $data = null)
  */
 class JsonResponse

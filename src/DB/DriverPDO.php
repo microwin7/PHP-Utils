@@ -5,7 +5,10 @@ namespace Microwin7\PHPUtils\DB;
 use Microwin7\PHPUtils\Utils\DebugDB;
 use Microwin7\PHPUtils\Configs\MainConfig;
 
-class DriverPDO
+/**
+ * @template-implements \Iterator<int, array>
+ */
+class DriverPDO implements \Iterator
 {
     private \PDO $DBH;
     private string $DSN;
@@ -16,6 +19,10 @@ class DriverPDO
     private int|string|null $insert_id = null;
     private string $database;
     private DebugDB $debug;
+
+    /** @var list<array[]> */
+    private array $data_iterator = [];
+    private int $position = 0;
 
     public function __construct(string $database = MainConfig::DB_NAME, string $table_prefix = '')
     {
@@ -66,7 +73,7 @@ class DriverPDO
      * 
      * @return mixed[]
      */
-    private function refValues(&...$arr): array
+    private function refValues(...$arr): array
     {
         $refs = [];
         foreach ($arr as $key => $_) {
@@ -76,7 +83,7 @@ class DriverPDO
     }
 
     /** @psalm-suppress MissingParamType */
-    private function bind_param(string $param_type, &...$params): void
+    private function bind_param(string $param_type, ...$params): void
     {
         if (!empty($params)) {
             if (!empty($param_type)) {
@@ -84,13 +91,13 @@ class DriverPDO
                 $param_id = 1;
                 foreach (str_split($param_type) as $var_type) {
                     match ($var_type) {
-                        's' => $this->STH->bindParam($param_id, $arr[$param_id - 1], \PDO::PARAM_STR),
-                        'i' => $this->STH->bindParam($param_id, $arr[$param_id - 1], \PDO::PARAM_INT),
-                        'b' => $this->STH->bindParam($param_id, $arr[$param_id - 1], \PDO::PARAM_BOOL),
-                        'n' => $this->STH->bindParam($param_id, $arr[$param_id - 1], \PDO::PARAM_NULL),
-                        'l' => $this->STH->bindParam($param_id, $arr[$param_id - 1], \PDO::PARAM_LOB),
-                        'c' => $this->STH->bindParam($param_id, $arr[$param_id - 1], \PDO::PARAM_STR_CHAR),
-                        default => $this->STH->bindParam($param_id, $arr[$param_id - 1], \PDO::PARAM_STR)
+                        's' => $this->STH->bindValue($param_id, $arr[$param_id - 1], \PDO::PARAM_STR),
+                        'i' => $this->STH->bindValue($param_id, $arr[$param_id - 1], \PDO::PARAM_INT),
+                        'b' => $this->STH->bindValue($param_id, $arr[$param_id - 1], \PDO::PARAM_BOOL),
+                        'n' => $this->STH->bindValue($param_id, $arr[$param_id - 1], \PDO::PARAM_NULL),
+                        'l' => $this->STH->bindValue($param_id, $arr[$param_id - 1], \PDO::PARAM_LOB),
+                        'c' => $this->STH->bindValue($param_id, $arr[$param_id - 1], \PDO::PARAM_STR_CHAR),
+                        default => $this->STH->bindValue($param_id, $arr[$param_id - 1], \PDO::PARAM_STR)
                     };
                     $param_id++;
                 }
@@ -98,10 +105,11 @@ class DriverPDO
         }
     }
 
-    public function query(string $sql, string $param_type = "", &...$params): static
+    public function query(string $sql, string $param_type = "", ...$params): static
     {
         $sql = $this->sql . $sql;
         $this->sql = '';
+        $this->data_iterator = [];
         $this->insert_id = null;
         $this->debug->debug($param_type ?
             "[{$this->database}] Executing query: $sql with params:\n$param_type -> " . implode(', ', $params) :
@@ -164,8 +172,11 @@ class DriverPDO
     {
         return $this->STH->fetch(\PDO::FETCH_NUM);
     }
-    // Ассоциативный массив одной строки (Не подлежит перебору)
-    public function assoc(): array|null|false
+    /**
+     * Ассоциативный массив одной строки (Не подлежит перебору)
+     * false в случае, если нет строк для получения данных, либо запрос был без данных
+     */
+    public function assoc(): array|false
     {
         return $this->STH->fetch(\PDO::FETCH_ASSOC);
     }
@@ -175,14 +186,22 @@ class DriverPDO
         $value = $this->row();
         return false === $value ? $value : $value[$column];
     }
-    // Ассоциативный массив всех строк ответа
+    /**
+     * Ассоциативный массив всех строк ответа
+     * @return list<array[]>
+     */
     public function array(): array
     {
+        /** @var list<array[]> */
         return $this->STH->fetchAll(\PDO::FETCH_ASSOC);
     }
-    // Индексированный и Ассоциативный массив всех строк ответа
-    public function all(): array|null|false
+    /**
+     * Индексированный и Ассоциативный массив всех строк ответа
+     * @return list<array[]>
+     */
+    public function all(): array
     {
+        /** @var list<array[]> */
         return $this->STH->fetchAll();
     }
     // Объект одной строки
@@ -221,5 +240,29 @@ class DriverPDO
     public function id(): int|string|null
     {
         return $this->insert_id;
+    }
+    /**
+     * BLOCK Iterator
+     */
+    public function rewind(): void
+    {
+        if (empty($this->data_iterator)) $this->data_iterator = $this->array();
+        $this->position = 0;
+    }
+    public function valid(): bool
+    {
+        return isset($this->data_iterator[$this->position]);
+    }
+    public function key(): int
+    {
+        return $this->position;
+    }
+    public function current(): array
+    {
+        return $this->data_iterator[$this->position];
+    }
+    public function next(): void
+    {
+        ++$this->position;
     }
 }

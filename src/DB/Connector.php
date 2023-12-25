@@ -32,7 +32,8 @@ class Connector
                     $module = $modules_keys_lower_case[strtolower($database)];
                     $database = $module['DB_NAME'];
                 } else {
-                    $database = MainConfig::DB_NAME;
+                    throw new ServerNotFoundException($database);
+                    //$database = MainConfig::DB_NAME;
                 }
             }
         }

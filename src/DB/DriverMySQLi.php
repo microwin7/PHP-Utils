@@ -5,7 +5,10 @@ namespace Microwin7\PHPUtils\DB;
 use Microwin7\PHPUtils\Utils\DebugDB;
 use Microwin7\PHPUtils\Configs\MainConfig;
 
-class DriverMySQLi
+/**
+ * @template-implements \Iterator<int, array>
+ */
+class DriverMySQLi implements \Iterator
 {
 	private \mysqli $mysqli;
 	/** @psalm-suppress PropertyNotSetInConstructor */
@@ -15,6 +18,10 @@ class DriverMySQLi
 	private int|string|null $insert_id = null;
 	private string $database;
 	private DebugDB $debug;
+
+	/** @var list<array[]> */
+	private array $data_iterator = [];
+	private int $position = 0;
 
 	public function __construct(string $database = MainConfig::DB_NAME, string $table_prefix = '')
 	{
@@ -50,6 +57,7 @@ class DriverMySQLi
 	{
 		$sql = $this->sql . $sql;
 		$this->sql = '';
+		$this->data_iterator = [];
 		$this->insert_id = null;
 		$this->debug->debug($param_type ?
 			"[{$this->database}] Executing query: $sql with params:\n$param_type -> " . implode(', ', $params) :
@@ -93,33 +101,49 @@ class DriverMySQLi
 		return $this->column();
 	}
 	// Индексированный массив одной строки (Не подлежит перебору)
-	public function row(): array|null|false
+	public function row(): array|null
 	{
-		if ($this->last_result === false) return $this->last_result;
+		// if ($this->last_result === false) return $this->last_result;
+		if ($this->last_result === false) throw new \ValueError('MySQLi Driver return last_result false from row() method');
 		return $this->last_result->fetch_row();
 	}
-	// Ассоциативный массив одной строки (Не подлежит перебору)
-	public function assoc(): array|null|false
+	/**
+	 * Ассоциативный массив одной строки (Не подлежит перебору)
+	 * null в случае, если нет строк для получения данных
+	 */
+	public function assoc(): array|null
 	{
-		if ($this->last_result === false) return $this->last_result;
+		// if ($this->last_result === false) return $this->last_result;
+		if ($this->last_result === false) throw new \ValueError('MySQLi Driver return last_result false from assoc() method');
 		return $this->last_result->fetch_assoc();
 	}
 	// Значение из конкретной колонки, по умолчанию первой
 	public function column(int $column = 0): mixed
 	{
-		if ($this->last_result === false) return $this->last_result;
+		// if ($this->last_result === false) return $this->last_result;
+		if ($this->last_result === false) throw new \ValueError('MySQLi Driver return last_result false from column() method');
 		return $this->last_result->fetch_column($column);
 	}
-	// Ассоциативный массив всех строк ответа
-	public function array(): array|false
+	/**
+	 * Ассоциативный массив всех строк ответа
+	 * @return list<array[]>
+	 */
+	public function array(): array
 	{
-		if ($this->last_result === false) return $this->last_result;
+		// if ($this->last_result === false) return $this->last_result;
+		if ($this->last_result === false) throw new \ValueError('MySQLi Driver return last_result false from array() method');
+		/** @var list<array[]> */
 		return $this->last_result->fetch_all(MYSQLI_ASSOC);
 	}
-	// Индексированный и Ассоциативный массив всех строк ответа
-	public function all(): array|null|false
+	/**
+	 * Индексированный и Ассоциативный массив всех строк ответа
+	 * @return list<array[]>
+	 */
+	public function all(): array
 	{
-		if ($this->last_result === false) return $this->last_result;
+		// if ($this->last_result === false) return $this->last_result;
+		if ($this->last_result === false) throw new \ValueError('MySQLi Driver return last_result false from all() method');
+		/** @var list<array[]> */
 		return $this->last_result->fetch_all(MYSQLI_BOTH);
 	}
 	// Объект одной строки
@@ -164,5 +188,29 @@ class DriverMySQLi
 	public function id(): int|string|null
 	{
 		return $this->insert_id;
+	}
+	/**
+	 * BLOCK Iterator
+	 */
+	public function rewind(): void
+	{
+		if (empty($this->data_iterator)) $this->data_iterator = $this->array();
+		$this->position = 0;
+	}
+	public function valid(): bool
+	{
+		return isset($this->data_iterator[$this->position]);
+	}
+	public function key(): int
+	{
+		return $this->position;
+	}
+	public function current(): array
+	{
+		return $this->data_iterator[$this->position];
+	}
+	public function next(): void
+	{
+		++$this->position;
 	}
 }

@@ -37,6 +37,17 @@ abstract class RequestParamsAbstract implements RequestParamsInterface
     {
         $this->with($name, $value);
     }
+    public function setVariable(string $name, string|null $value): static
+    {
+        return $this->with($name, $value);
+    }
+    /**
+     * @param EnumRequestInterface $value
+     */
+    public function withEnum(object $value): static
+    {
+        return $this->with(null, $value);
+    }
     /** Валидация только если ключ найден */
     protected function validateVariable(string $key, string $regexp): static
     {

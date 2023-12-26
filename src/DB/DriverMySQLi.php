@@ -22,6 +22,8 @@ class DriverMySQLi implements \Iterator
 	/** @var list<array[]> */
 	private array $data_iterator = [];
 	private int $position = 0;
+	/** @var list<int> */
+	private array $unsetKeys = [];
 
 	public function __construct(string $database = MainConfig::DB_NAME, string $table_prefix = '')
 	{
@@ -58,6 +60,7 @@ class DriverMySQLi implements \Iterator
 		$sql = $this->sql . $sql;
 		$this->sql = '';
 		$this->data_iterator = [];
+		$this->unsetKeys = [];
 		$this->insert_id = null;
 		$this->debug->debug($param_type ?
 			"[{$this->database}] Executing query: $sql with params:\n$param_type -> " . implode(', ', $params) :
@@ -209,8 +212,16 @@ class DriverMySQLi implements \Iterator
 	{
 		return $this->data_iterator[$this->position];
 	}
+	public function unset(): void
+	{
+		unset($this->data_iterator[$this->position]);
+		$this->unsetKeys[] = $this->position;
+	}
 	public function next(): void
 	{
 		++$this->position;
+		foreach ($this->unsetKeys as $v) {
+			if ($this->position === $v) ++$this->position;
+		}
 	}
 }

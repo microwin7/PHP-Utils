@@ -6,6 +6,7 @@ namespace Microwin7\PHPUtils\Request;
 
 use Microwin7\PHPUtils\Contracts\Enum\EnumInterface;
 use Microwin7\PHPUtils\Contracts\Enum\EnumRequestInterface;
+use Microwin7\PHPUtils\Exceptions\RequiredArgumentMissingException;
 
 #[\AllowDynamicProperties]
 abstract class RequestParamsAbstract implements RequestParamsInterface
@@ -73,21 +74,27 @@ abstract class RequestParamsAbstract implements RequestParamsInterface
     /**
      * @param interface-string<\BackedEnum & EnumInterface & EnumRequestInterface> $enumClass
      * 
-     * @throws \InvalidArgumentException
+     * @throws RequiredArgumentMissingException
      * @throws \ValueError
      */
     protected function addEnum(string $enumClass, bool $maybeDefault = false): static
     {
-        if (array_key_exists($enumClass::getNameRequestVariable(), $this->options)) {
-            $optionValueEnum = $this->options[$enumClass::getNameRequestVariable()];
-            if (is_numeric($optionValueEnum))
-                return $this->with($enumClass::getNameVariable(), $enumClass::from((int)$optionValueEnum));
-            else
-                return $this->with($enumClass::getNameVariable(), $enumClass::fromString($optionValueEnum));
-        } elseif ($maybeDefault) {
+        try {
+            if (array_key_exists($enumClass::getNameRequestVariable(), $this->options)) {
+                $optionValueEnum = $this->options[$enumClass::getNameRequestVariable()];
+                if (empty($optionValueEnum)) throw new \ValueError;
+                if (is_numeric($optionValueEnum))
+                    return $this->with($enumClass::getNameVariable(), $enumClass::from((int)$optionValueEnum));
+                else
+                    return $this->with($enumClass::getNameVariable(), $enumClass::fromString($optionValueEnum));
+            } else throw new \ValueError();
+        } catch (\InvalidArgumentException | \ValueError $e) {
+            if (!$maybeDefault) {
+                if ($e instanceof \ValueError) throw new \ValueError('Requested parameter: "' . $enumClass::getNameRequestVariable() . '" value cannot be empty');
+                throw new RequiredArgumentMissingException($enumClass::getNameRequestVariable());
+            }
             return $this->with($enumClass::getNameVariable(), $enumClass::getDefault());
         }
-        throw new \ValueError('Requested parameter: "' . $enumClass::getNameRequestVariable() . '" value cannot be empty');
     }
     /**
      * @throws \ValueError

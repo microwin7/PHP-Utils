@@ -3,6 +3,7 @@
 namespace Microwin7\PHPUtils\Utils;
 
 use Microwin7\PHPUtils\Configs\TextureConfig;
+use Microwin7\PHPUtils\Contracts\User\UserStorageTypeEnum;
 use Microwin7\PHPUtils\Exceptions\TextureSizeException;
 use Microwin7\PHPUtils\Exceptions\TextureSizeHDException;
 use function Microwin7\PHPUtils\str_ends_with_slash;
@@ -116,8 +117,12 @@ class Texture
     {
         return empty(TextureConfig::EXT) ? '' : '.' . TextureConfig::EXT;
     }
-    public static function digest(string $data): string
+    public static function digest(string $data, UserStorageTypeEnum $hashType = UserStorageTypeEnum::DB_SHA256): string
     {
-        return hash('sha256', $data);
+        return match ($hashType) {
+            UserStorageTypeEnum::DB_SHA1 => hash('sha1', $data),
+            UserStorageTypeEnum::DB_SHA256 => hash('sha256', $data),
+            default => md5($data)
+        };
     }
 }

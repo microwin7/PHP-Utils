@@ -12,7 +12,7 @@ class GDUtils
      */
     public static function slim(string $data): bool
     {
-        return self::checkSkinslimFromImage(imagecreatefromstring($data));
+        return self::checkSkinSlimFromImage(imagecreatefromstring($data));
     }
     /**
      * Функция только для вычисления данных о скине
@@ -20,7 +20,7 @@ class GDUtils
      * 
      * @throws \TypeError
      */
-    public static function checkSkinslimFromImage(\GdImage|false $image): bool
+    public static function checkSkinSlimFromImage(\GdImage|false $image): bool
     {
         if ($image === false) throw new \TypeError('Error reading data. This file is not an image.');
         $fraction = imagesx($image) / 8;
@@ -58,6 +58,10 @@ class GDUtils
         imagesavealpha($canvas, true);
         return $canvas;
     }
+    /**
+     * Support: PNG|JPEG|GIF
+     * Value return: IMAGETYPE_*
+     */
     public static function getImageMimeType(string $imagedata): int|null
     {
         $imagemimetypes = array(

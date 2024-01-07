@@ -21,9 +21,9 @@ class FileSystem
      * @return string[]
      * @throws FileSystemException
      */
-    public function findFiles(string $directory): array
+    public function findFiles(string $directory, int $level = 1, string $extension = TextureConfig::EXT): array
     {
-        if ($this->is_dir($directory)) return $this->recursiveSearchFiles($directory, 1);
+        if ($this->is_dir($directory)) return $this->recursiveSearchFiles($directory, $level, $extension);
         else throw new FileSystemException("The folder does not exist or the script does not have read access");
     }
     /** @param string|string[] $folders */
@@ -99,7 +99,7 @@ class FileSystem
         return false;
     }
     /** @return string[] */
-    private function recursiveSearchFiles(string $directory, int $level = -1): array
+    private function recursiveSearchFiles(string $directory, int $level = -1, string $extension = ''): array
     {
         /** @var string[] $filename */
         $filename = [];
@@ -118,7 +118,7 @@ class FileSystem
             foreach ($iterator as $path => $obj) {
                 if (!$obj->isDir()) {
                     $filetype = pathinfo($path, PATHINFO_EXTENSION);
-                    if (strtolower($filetype) === TextureConfig::EXT) {
+                    if (strtolower($filetype) === $extension) {
                         $filename[] = $path;
                     }
                 }

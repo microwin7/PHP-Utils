@@ -12,7 +12,16 @@ class GDUtils
      */
     public static function slim(string $data): bool
     {
-        $image = imagecreatefromstring($data);
+        return self::checkSkinslimFromImage(imagecreatefromstring($data));
+    }
+    /**
+     * Функция только для вычисления данных о скине
+     * @return bool
+     * 
+     * @throws \TypeError
+     */
+    public static function checkSkinslimFromImage(\GdImage|false $image): bool
+    {
         if ($image === false) throw new \TypeError('Error reading data. This file is not an image.');
         $fraction = imagesx($image) / 8;
         if (is_float($fraction)) throw new \TypeError("Error calculating fraction from \GdImage.");
@@ -46,7 +55,28 @@ class GDUtils
         $canvas = imagecreatetruecolor($width, $height);
         $transparent = imagecolorallocatealpha($canvas, 255, 255, 255, 127);
         imagefill($canvas, 0, 0, $transparent);
-        imagesavealpha($canvas, TRUE);
+        imagesavealpha($canvas, true);
         return $canvas;
+    }
+    public static function getImageMimeType(string $imagedata): int|null
+    {
+        $imagemimetypes = array(
+            IMAGETYPE_PNG => "89504E470D0A1A0A",
+            IMAGETYPE_JPEG => "FFD8",
+            IMAGETYPE_GIF => "474946",
+        );
+        foreach ($imagemimetypes as $mime => $hexbytes) {
+            $bytes = self::getBytesFromHexString($hexbytes);
+            if (substr($imagedata, 0, strlen($bytes)) == $bytes)
+                return $mime;
+        }
+        return null;
+    }
+    private static function getBytesFromHexString(string $hexdata): string
+    {
+        $bytes = [];
+        for ($count = 0; $count < strlen($hexdata); $count += 2)
+            $bytes[] = chr(hexdec(substr($hexdata, $count, 2)));
+        return implode($bytes);
     }
 }

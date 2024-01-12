@@ -6,6 +6,7 @@ use Microwin7\PHPUtils\Attributes\AsArguments;
 use function Microwin7\PHPUtils\implodeRecursive;
 use Microwin7\PHPUtils\Attributes\RegexArguments;
 use Microwin7\PHPUtils\Contracts\Enum\EnumInterface;
+use Microwin7\PHPUtils\Contracts\Component\Enum\HTTP;
 use Microwin7\PHPUtils\Contracts\Enum\EnumRequestInterface;
 use Microwin7\PHPUtils\Exceptions\RequiredArgumentMissingException;
 
@@ -40,6 +41,10 @@ class RequiredArguments
     {
         return $this->arguments[$name];
     }
+    public function getInstance(): static
+    {
+        return $this;
+    }
     private function setArgumentsInstance(): void
     {
         if ($attributes = (new \ReflectionClass(static::class))->getAttributes(AsArguments::class))
@@ -57,10 +62,10 @@ class RequiredArguments
     private function setWhereSearch(): void
     {
         $this->where = match ($this->argumentsInstance->whereSearch) {
-            'GET' => $_GET,
-            'POST' => $_POST,
-            'REQUEST' => $_REQUEST,
-            'JSON' => Data::getData(),
+            HTTP::GET => $_GET,
+            HTTP::POST => $_POST,
+            HTTP::REQUEST => $_REQUEST,
+            HTTP::JSON => Data::getData(),
         };
     }
     private function setRequiredArguments(): void

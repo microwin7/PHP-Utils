@@ -4,6 +4,7 @@ namespace Microwin7\PHPUtils\DB;
 
 use Microwin7\PHPUtils\Utils\DebugDB;
 use Microwin7\PHPUtils\Configs\MainConfig;
+use Microwin7\PHPUtils\Exceptions\DBException;
 
 /**
  * @template-implements \Iterator<int, array>
@@ -71,13 +72,13 @@ class DriverMySQLi implements \Iterator
 			$this->debug->debug_error($param_type ?
 				"[{$this->database}] {$e}\n$sql with params:\n$param_type -> " . implode(', ', $params) :
 				"[{$this->database}] {$e}\n$sql");
-			exit('MySQL query error');
+			throw new DBException('MySQL query error');
 		}
 		if ($this->mysqli->errno) {
 			$this->debug->debug_error($param_type ?
 				"[{$this->database}] Statement preparing error: {$this->mysqli->error}\n$sql with params:\n$param_type -> " . implode(', ', $params) :
 				"[{$this->database}] Statement preparing error: {$this->mysqli->error}\n$sql");
-			exit('MySQL preparing error');
+			throw new DBException('MySQL preparing error');
 		}
 		if ($param_type != "") $stmt->bind_param($param_type, ...$params);
 		$stmt->execute();
@@ -85,7 +86,7 @@ class DriverMySQLi implements \Iterator
 			$this->debug->debug_error($param_type ?
 				"[{$this->database}] Statement execution error: {$this->mysqli->error}\n$sql with params:\n$param_type -> " . implode(', ', $params) :
 				"[{$this->database}] Statement execution error: {$this->mysqli->error}\n$sql");
-			exit('MySQL query error');
+			throw new DBException('MySQL query error');
 		}
 		// Возвращается false если запрос был подготовленным выражением, например UPDATE, INSERT или DELETE
 		$this->last_result = $stmt->get_result();

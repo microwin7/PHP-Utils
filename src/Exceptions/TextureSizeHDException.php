@@ -4,7 +4,8 @@ namespace Microwin7\PHPUtils\Exceptions;
 
 class TextureSizeHDException extends \Exception
 {
-    function __construct() {
+    public function __construct()
+    {
         parent::__construct("Файл превышает стандартные размеры!");
     }
 }

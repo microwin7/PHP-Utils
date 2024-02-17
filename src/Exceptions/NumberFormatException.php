@@ -4,8 +4,8 @@ namespace Microwin7\PHPUtils\Exceptions;
 
 class NumberFormatException extends \Exception
 {
-    function __construct(string $input)
+    public function __construct(string $message)
     {
-        parent::__construct("For input string: \"$input\"");
+        parent::__construct("For input string: \"$message\"");
     }
 }

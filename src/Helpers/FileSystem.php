@@ -47,7 +47,7 @@ class FileSystem
                 return true;
             }
         } catch (\Exception $e) {
-            exit("An unexpected error occurred while validating the file: " . $e->getMessage());
+            throw new FileSystemException("An unexpected error occurred while validating the file: " . $e->getMessage());
         }
         return false;
     }
@@ -59,7 +59,7 @@ class FileSystem
                 return true;
             }
         } catch (\Exception $e) {
-            exit("An unexpected error occurred while validating the folder: " . $e->getMessage());
+            throw new FileSystemException("An unexpected error occurred while validating the folder: " . $e->getMessage());
         }
         return false;
     }
@@ -92,9 +92,9 @@ class FileSystem
                 }
             }
         } catch (UnexpectedValueException $e) {
-            exit("An unexpected error occurred while searching for files: " . $e->getMessage());
+            throw new FileSystemException("An unexpected error occurred while searching for files: " . $e->getMessage());
         } catch (\Exception $e) {
-            exit($e->getMessage());
+            throw new FileSystemException($e->getMessage());
         }
         return false;
     }
@@ -124,9 +124,9 @@ class FileSystem
                 }
             }
         } catch (UnexpectedValueException $e) {
-            exit("An unexpected error occurred while searching for files: " . $e->getMessage());
+            throw new FileSystemException("An unexpected error occurred while searching for files: " . $e->getMessage());
         } catch (\Exception $e) {
-            exit($e->getMessage());
+            throw new FileSystemException($e->getMessage());
         } finally {
             return $filename;
         }

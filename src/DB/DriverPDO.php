@@ -4,6 +4,7 @@ namespace Microwin7\PHPUtils\DB;
 
 use Microwin7\PHPUtils\Utils\DebugDB;
 use Microwin7\PHPUtils\Configs\MainConfig;
+use Microwin7\PHPUtils\Exceptions\DBException;
 
 /**
  * @template-implements \Iterator<int, array>
@@ -37,7 +38,7 @@ class DriverPDO implements \Iterator
             $this->preConnectionExec();
         } catch (\PDOException $e) {
             $this->debug->debug_error("[{$this->database}] Connection ERROR: [CODE: " . ($e->errorInfo[1] ?? 'NULL')  . " | MESSAGE: " . ($e->errorInfo[2] ?? 'NULL') . " ]");
-            exit('PDO Connection ERROR');
+            throw new DBException('PDO Connection ERROR');
         }
     }
     private function generateDSN(): void
@@ -123,7 +124,7 @@ class DriverPDO implements \Iterator
             $this->debug->debug_error($param_type ?
                 "[{$this->database}] Statement preparing error: {$e}\n$sql with params:\n$param_type -> " . implode(', ', $params) :
                 "[{$this->database}] Statement preparing error: {$e}\n$sql");
-            exit('SQL preparing error');
+            throw new DBException('SQL preparing error');
         }
         $this->bind_param($param_type, ...$params);
         try {
@@ -132,7 +133,7 @@ class DriverPDO implements \Iterator
             $this->debug->debug_error($param_type ?
                 "[{$this->database}] Statement execution error: {$e}\n$sql with params:\n$param_type -> " . implode(', ', $params) :
                 "[{$this->database}] Statement execution error: {$e}\n$sql");
-            exit('SQL query error');
+            throw new DBException('SQL query error');
         }
         try {
             $this->insert_id = $this->DBH->lastInsertId();
@@ -151,7 +152,7 @@ class DriverPDO implements \Iterator
     //         $this->debug->debug_error($param_type ?
     //             "[{$this->database}] Statement execution error: {$e}\n$sql with params:\n$param_type -> " . implode(', ', $params) :
     //             "[{$this->database}] Statement execution error: {$e}\n$sql");
-    //         exit('SQL query error');
+    //         throw new DBException('SQL query error');
     //     }
     // }
 

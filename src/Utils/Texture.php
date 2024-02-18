@@ -119,6 +119,7 @@ class Texture
     }
     public static function digest(string $data, UserStorageTypeEnum $hashType = UserStorageTypeEnum::DB_SHA256): string
     {
+        if (TextureConfig::LEGACY_DIGEST) return strtr(base64_encode(md5($data, true)), '+/', '-_');
         return match ($hashType) {
             UserStorageTypeEnum::DB_SHA1 => hash('sha1', $data),
             UserStorageTypeEnum::DB_SHA256 => hash('sha256', $data),

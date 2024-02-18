@@ -17,7 +17,7 @@ abstract class Cape implements \JsonSerializable
         public readonly TextureStorageTypeEnum          $textureStorageType,
         public readonly string                          $data,
         public readonly string                          $url,
-        string|null                     $digest = null,
+                        string|null                     $digest = null,
     ) {
         $this->digest = null !== $digest ? $digest : (TextureConfig::LEGACY_DIGEST ? Texture::digest_legacy($this->data) : Texture::digest($this->data));
     }

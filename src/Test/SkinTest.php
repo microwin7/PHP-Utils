@@ -7,6 +7,7 @@ namespace Microwin7\PHPUtils\Test;
 use Microwin7\PHPUtils\Rules\Regex;
 use Microwin7\PHPUtils\Utils\Texture;
 use Microwin7\PHPUtils\Configs\PathConfig;
+use Microwin7\PHPUtils\Configs\TextureConfig;
 use Microwin7\PHPUtils\Test\RequestParamsTest;
 use function Microwin7\PHPUtils\str_ends_with_slash;
 use Microwin7\PHPUtils\Contracts\Texture\Models\Skin;
@@ -21,7 +22,7 @@ final class SkinTest extends Skin
     {
         $json = [
             'url' => static::urlComplete(TextureStorageTypeEnum::COLLECTION, (string)RequestParamsTest::fromRequest()),
-            'digest' => Texture::digest($this->data),
+            'digest' => (TextureConfig::LEGACY_DIGEST ? Texture::digest_legacy($this->data) :Texture::digest($this->data)),
         ];
         if ($this->isSlim) $json['metadata'] = ['model' => 'slim'];
         return $json;

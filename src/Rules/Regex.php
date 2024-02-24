@@ -18,6 +18,9 @@ class Regex
     public const USERNAME = "/^\w{2,16}$/";
     public const UUID_NO_DASH = "/^[0-9a-f]{32}/";
     public const UUIDv1_AND_v4 = "/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}/";
+    public const MD5 = static::UUID_NO_DASH;
+    public const SHA1 = "/^[0-9a-f]{40}/";
+    public const SHA256 = "/^[0-9a-f]{64}/";
 
     public static function valid_with_pattern(string $string, string $pattern): bool
     {

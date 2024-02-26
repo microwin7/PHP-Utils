@@ -82,7 +82,6 @@ abstract class RequestParamsAbstract implements RequestParamsInterface
         try {
             if (array_key_exists($enumClass::getNameRequestVariable(), $this->options)) {
                 $optionValueEnum = $this->options[$enumClass::getNameRequestVariable()];
-                if (empty($optionValueEnum)) throw new \ValueError;
                 if (is_numeric($optionValueEnum))
                     return $this->with($enumClass::getNameVariable(), $enumClass::from((int)$optionValueEnum));
                 else

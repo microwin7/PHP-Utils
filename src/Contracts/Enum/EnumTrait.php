@@ -16,6 +16,9 @@ trait EnumTrait
             array_column(static::cases(), 'name')
         );
     }
+    /**
+     * @throws \InvalidArgumentException
+     */
     public static function fromString(string $name): static
     {
         return static::tryFromString($name)

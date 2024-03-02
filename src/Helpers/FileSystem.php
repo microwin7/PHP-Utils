@@ -9,10 +9,9 @@ use Microwin7\PHPUtils\Exceptions\FileSystemException;
 class FileSystem
 {
     /**
-     * @return string|false
      * @throws FileSystemException
      */
-    public function findFile(string $directory, string $fileName, string $extension): string|false
+    public function findFile(string $directory, string $fileName, string $extension): string|null
     {
         if ($this->is_dir($directory)) return $this->recursiveSearchNameFileCaseInsensitive($directory, $fileName, $extension, 0);
         else throw new FileSystemException("The folder does not exist or the script does not have read access");
@@ -63,7 +62,7 @@ class FileSystem
         }
         return false;
     }
-    public function recursiveSearchNameFileCaseInsensitive(string $directory, string $fileName, string $extension, int $level = -1): string|false
+    public function recursiveSearchNameFileCaseInsensitive(string $directory, string $fileName, string $extension, int $level = -1): string|null
     {
         try {
             $directory = preg_replace("/\/+$/", "", $directory);
@@ -96,7 +95,7 @@ class FileSystem
         } catch (\Exception $e) {
             throw new FileSystemException($e->getMessage());
         }
-        return false;
+        return null;
     }
     /** @return string[] */
     private function recursiveSearchFiles(string $directory, int $level = -1, string $extension = ''): array

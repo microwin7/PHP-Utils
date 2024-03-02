@@ -13,9 +13,17 @@ enum ResponseTypeEnum: int implements JsonSerializable, EnumInterface, EnumReque
 {
     use EnumTrait;
 
-    case JSON         = 0;
-    case SKIN         = 1;
-    case CAPE         = 2;
+    case JSON               = 0;
+    case SKIN               = 1;
+    case CAPE               = 2;
+    case AVATAR             = 3;
+    case FRONT              = 4;
+    case FRONT_CAPE         = 5;
+    case FRONT_WITH_CAPE    = 6;
+    case BACK               = 7;
+    case BACK_CAPE          = 8;
+    case BACK_WITH_CAPE     = 9;
+    case CAPE_RESIZE        = 10;
 
     public static function getDefault(): static
     {

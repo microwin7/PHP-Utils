@@ -15,7 +15,7 @@ class MainConfig
     public const string DB_PORT = '3306';
     /**
      * DriverTypeEnum::PDO [SubDBTypeEnum::MySQL, SubDBTypeEnum::PostgreSQL]
-     * DriverTypeEnum::MySQL [SubDBTypeEnum::MySQL]
+     * DriverTypeEnum::MySQLi [SubDBTypeEnum::MySQL]
      */
     public const DriverTypeEnum DB_DRIVER = DriverTypeEnum::PDO; // MySQLi, PDO | Default: MySQLi
     /**

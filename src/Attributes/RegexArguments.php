@@ -2,7 +2,7 @@
 
 namespace Microwin7\PHPUtils\Attributes;
 
-#[\Attribute(\Attribute::TARGET_CLASS | \Attribute::IS_REPEATABLE)]
+#[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE)]
 class RegexArguments
 {
     public function __construct(

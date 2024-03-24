@@ -38,6 +38,10 @@ abstract class RequestParamsAbstract implements RequestParamsInterface
     {
         $this->with($name, $value);
     }
+    public function __isset(string $name): bool
+    {
+        return (bool) $this->arguments[$name];
+    }
     public function setVariable(string $name, string|null $value): static
     {
         return $this->with($name, $value);

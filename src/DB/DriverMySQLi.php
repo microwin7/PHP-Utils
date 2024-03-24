@@ -8,6 +8,7 @@ use Microwin7\PHPUtils\Exceptions\DBException;
 
 /**
  * @template-implements \Iterator<int, array>
+ * @deprecated 1.6.0.12
  */
 class DriverMySQLi implements \Iterator
 {
@@ -87,6 +88,13 @@ class DriverMySQLi implements \Iterator
 				"[{$this->database}] Statement execution error: {$this->mysqli->error}\n$sql with params:\n$param_type -> " . implode(', ', $params) :
 				"[{$this->database}] Statement execution error: {$this->mysqli->error}\n$sql");
 			throw new DBException('MySQL query error');
+			// switch ($e->getCode()) {
+            //     case 1062:
+            //         throw new DuplicateEntry($e->getMessage());
+            //         break;
+            //     default:
+            //         throw new DBException('SQL query error');
+            // }
 		}
 		// Возвращается false если запрос был подготовленным выражением, например UPDATE, INSERT или DELETE
 		$this->last_result = $stmt->get_result();

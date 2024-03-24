@@ -25,7 +25,7 @@ class RequiredArguments
     /** @var array<string, string>|null $regexArguments */
     private ?array $regexArguments = null;
 
-    public function __construct()
+    public function __construct(private \ReflectionFunctionAbstract|null $reflectionFunctionAbstract = null)
     {
         $this->setArgumentsInstance();
         $this->setRegexArguments();
@@ -41,19 +41,31 @@ class RequiredArguments
     {
         return $this->arguments[$name];
     }
+    public function __isset(string $name): bool
+    {
+        return isset($this->arguments[$name]);
+    }
     public function getInstance(): static
     {
         return $this;
     }
     private function setArgumentsInstance(): void
     {
-        if ($attributes = (new \ReflectionClass(static::class))->getAttributes(AsArguments::class))
+        if ($this->reflectionFunctionAbstract !== null) {
+            $this->argumentsInstance = $this->reflectionFunctionAbstract->getAttributes(AsArguments::class)[0]->newInstance();
+        } else if ($attributes = (new \ReflectionClass(static::class))->getAttributes(AsArguments::class))
             $this->argumentsInstance = $attributes[0]->newInstance();
         else
-            throw new RequiredArgumentMissingException('Attribute ' . AsArguments::class . ' missing');
+            throw new RequiredArgumentMissingException('Attribute: ' . AsArguments::class . ' missing');
     }
     private function setRegexArguments(): void
     {
+        if ($this->reflectionFunctionAbstract !== null) {
+            foreach ($this->reflectionFunctionAbstract->getAttributes(RegexArguments::class) as $attribute) {
+                $instance = $attribute->newInstance();
+                $this->regexArguments[$instance->argument] = $instance->regexp;
+            }
+        }
         foreach ((new \ReflectionClass(static::class))->getAttributes(RegexArguments::class) as $attribute) {
             $instance = $attribute->newInstance();
             $this->regexArguments[$instance->argument] = $instance->regexp;

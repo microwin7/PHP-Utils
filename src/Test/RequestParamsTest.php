@@ -18,7 +18,7 @@ final class RequestParamsTest extends RequestParamsAbstract
         return $requestParams->setOptions($_GET)
             ->addEnum(ResponseTypeEnum::class)
             ->addEnum(TextureStorageTypeEnum::class, true)
-            ->addVariable('login', Regex::LOGIN, true)
+            ->addVariable('login', Regex::combineOR(Regex::NUMERIC_REGXP, Regex::USERNAME, Regex::UUIDv1_AND_v4, Regex::MD5, Regex::SHA1, Regex::SHA256), true)
             ->addVariable('username', Regex::USERNAME, true)
             ->addVariable('uuid', Regex::UUIDv1_AND_v4, true)
             ->addEnum(MethodTypeEnum::class, true);

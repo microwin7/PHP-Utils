@@ -5,6 +5,7 @@ namespace Microwin7\PHPUtils\DB;
 use Microwin7\PHPUtils\Utils\DebugDB;
 use Microwin7\PHPUtils\Configs\MainConfig;
 use Microwin7\PHPUtils\Exceptions\DBException;
+use Microwin7\PHPUtils\Exceptions\DB\DuplicateEntry;
 
 /**
  * @template-implements \Iterator<int, array>
@@ -133,7 +134,12 @@ class DriverPDO implements \Iterator
             $this->debug->debug_error($param_type ?
                 "[{$this->database}] Statement execution error: {$e}\n$sql with params:\n$param_type -> " . implode(', ', $params) :
                 "[{$this->database}] Statement execution error: {$e}\n$sql");
-            throw new DBException('SQL query error');
+            switch ($e->getCode()) {
+                case 23000:
+                    throw new DuplicateEntry($this->STH->errorInfo()[2]);
+                default:
+                    throw new DBException('SQL query error');
+            }
         }
         try {
             $this->insert_id = $this->DBH->lastInsertId();
@@ -169,26 +175,26 @@ class DriverPDO implements \Iterator
     public function value(): mixed
     {
         $value = $this->row();
-        return false === $value ? $value : $value[0];
+        return null === $value ? null : $value[0];
     }
     // Индексированный массив одной строки (Не подлежит перебору)
-    public function row(): array|false
+    public function row(): array|null
     {
-        return $this->STH->fetch(\PDO::FETCH_NUM);
+        return $this->STH->fetch(\PDO::FETCH_NUM) ?: null;
     }
     /**
      * Ассоциативный массив одной строки (Не подлежит перебору)
      * false в случае, если нет строк для получения данных, либо запрос был без данных
      */
-    public function assoc(): array|false
+    public function assoc(): array|null
     {
-        return $this->STH->fetch(\PDO::FETCH_ASSOC);
+        return $this->STH->fetch(\PDO::FETCH_ASSOC) ?: null;
     }
     // Значение из конкретной колонки, по умолчанию первой
     public function column(int $column = 0): mixed
     {
         $value = $this->row();
-        return false === $value ? $value : $value[$column];
+        return null === $value ? null : $value[$column];
     }
     /**
      * Ассоциативный массив всех строк ответа
@@ -217,7 +223,7 @@ class DriverPDO implements \Iterator
      */
     public function obj($class = \stdClass::class, array $constructor_args = [])
     {
-        return $this->STH->fetchObject($class, $constructor_args);
+        return $this->STH->fetchObject($class, $constructor_args) ?: null;
     }
     /**
      * Индексированный массив объектов результата

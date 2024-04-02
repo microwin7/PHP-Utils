@@ -8,6 +8,7 @@ use Microwin7\PHPUtils\Attributes\RegexArguments;
 use Microwin7\PHPUtils\Contracts\Enum\EnumInterface;
 use Microwin7\PHPUtils\Contracts\Component\Enum\HTTP;
 use Microwin7\PHPUtils\Contracts\Enum\EnumRequestInterface;
+use Microwin7\PHPUtils\Exceptions\RegexArgumentsFailedException;
 use Microwin7\PHPUtils\Exceptions\RequiredArgumentMissingException;
 
 class RequiredArguments
@@ -22,7 +23,7 @@ class RequiredArguments
     private array $where;
 
     private AsArguments $argumentsInstance;
-    /** @var array<string, string>|null $regexArguments */
+    /** @var array<string, RegexArguments>|null $regexArguments */
     private ?array $regexArguments = null;
 
     public function __construct(private \ReflectionFunctionAbstract|null $reflectionFunctionAbstract = null)
@@ -63,12 +64,12 @@ class RequiredArguments
         if ($this->reflectionFunctionAbstract !== null) {
             foreach ($this->reflectionFunctionAbstract->getAttributes(RegexArguments::class) as $attribute) {
                 $instance = $attribute->newInstance();
-                $this->regexArguments[$instance->argument] = $instance->regexp;
+                $this->regexArguments[$instance->argument] = $instance;
             }
         }
         foreach ((new \ReflectionClass(static::class))->getAttributes(RegexArguments::class) as $attribute) {
             $instance = $attribute->newInstance();
-            $this->regexArguments[$instance->argument] = $instance->regexp;
+            $this->regexArguments[$instance->argument] = $instance;
         }
     }
     private function setWhereSearch(): void
@@ -137,7 +138,7 @@ class RequiredArguments
         if (strrpos($argument, '\\') === false) {
             $whereValue = $this->where[$argument] ?? ($optional ? null : throw new RequiredArgumentMissingException($argument));
             $this->with($argument, $whereValue);
-            if (isset($this->regexArguments[$argument])) $this->validateVariable($argument, $this->regexArguments[$argument]);
+            if (isset($this->regexArguments[$argument])) $this->validateVariable($this->regexArguments[$argument]);
         } else if (enum_exists($argument)) {
             $argumentClazz = new \ReflectionClass($argument);
             if (
@@ -160,11 +161,20 @@ class RequiredArguments
             }
         }
     }
-    protected function validateVariable(string $key, string $regexp): void
+    protected function validateVariable(RegexArguments $regexArgument): void
     {
-        null === $this->$key
-            ?: filter_var($this->$key, FILTER_VALIDATE_REGEXP, ['options' => ['regexp' => $regexp]])
-            ?: throw new \ValueError(sprintf('Field "%s" should be valid with pattern: [%s], "%s" given', $key, $regexp, (string)$this->$key));
+        null === $this->{$regexArgument->argument}
+            ?: filter_var($this->{$regexArgument->argument}, FILTER_VALIDATE_REGEXP, ['options' => ['regexp' => $regexArgument->regexp]])
+            ?: (
+                !is_null($regexArgument->messageCallback)
+                ? throw new RegexArgumentsFailedException($regexArgument->messageCallback)
+                : throw new \ValueError(sprintf(
+                    'Field "%s" should be valid with pattern: [%s], "%s" given',
+                    $regexArgument->argument,
+                    $regexArgument->regexp,
+                    (string)$this->{$regexArgument->argument}
+                ))
+            );
     }
     /** @param string|EnumRequestInterface|EnumInterface|\BackedEnum|non-empty-array<int|string, array<int|string, mixed>|string>|null $value */
     private function with(string $property, string|object|array|null $value): void

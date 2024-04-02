@@ -7,7 +7,8 @@ class RegexArguments
 {
     public function __construct(
         public string $argument,
-        public string $regexp
+        public string $regexp,
+        public ?string $messageCallback = null
     ) {
     }
 }

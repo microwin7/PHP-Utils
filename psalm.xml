@@ -22,5 +22,6 @@
         <MixedOperand errorLevel="suppress" />
         <UnusedClass errorLevel="suppress" />
         <UnusedVariable errorLevel="suppress" />
+        <DeprecatedClass errorLevel="suppress" />
     </issueHandlers>
 </psalm>

@@ -2,6 +2,7 @@
 
 namespace Microwin7\PHPUtils\DB;
 
+use Microwin7\PHPUtils\Main;
 use Microwin7\PHPUtils\Utils\DebugDB;
 use Microwin7\PHPUtils\Configs\MainConfig;
 use Microwin7\PHPUtils\Exceptions\DBException;
@@ -28,14 +29,14 @@ class DriverPDO implements \Iterator
     /** @var list<int> */
     private array $unsetKeys = [];
 
-    public function __construct(string $database = MainConfig::DB_NAME, string $table_prefix = '')
+    public function __construct(?string $database = null, string $table_prefix = '')
     {
         $this->table_prefix = $table_prefix;
-        $this->database = $database;
+        $this->database = $database ?? Main::DB_NAME();
         $this->generateDSN();
         $this->debug = new DebugDB;
         try {
-            $this->DBH = new \PDO($this->DSN, MainConfig::DB_USER, MainConfig::DB_PASS, MainConfig::DB_PDO_OPTIONS);
+            $this->DBH = new \PDO($this->DSN, Main::DB_USER(), Main::DB_PASS(), MainConfig::DB_PDO_OPTIONS);
             $this->preConnectionExec();
         } catch (\PDOException $e) {
             $this->debug->debug_error("[{$this->database}] Connection ERROR: [CODE: " . ($e->errorInfo[1] ?? 'NULL')  . " | MESSAGE: " . ($e->errorInfo[2] ?? 'NULL') . " ]");
@@ -44,9 +45,9 @@ class DriverPDO implements \Iterator
     }
     private function generateDSN(): void
     {
-        $this->DSN = MainConfig::DB_SUD_DB->value . ':host=' . MainConfig::DB_HOST . ';port=' . MainConfig::DB_PORT . ';dbname=' . $this->database;
+        $this->DSN = Main::DB_SUD_DB()->value . ':host=' . Main::DB_HOST() . ';port=' . Main::DB_PORT() . ';dbname=' . $this->database;
         /** @psalm-suppress TypeDoesNotContainType */
-        $this->DSN .= match (MainConfig::DB_SUD_DB) {
+        $this->DSN .= match (Main::DB_SUD_DB()) {
             SubDBTypeEnum::MySQL =>  ';charset=utf8mb4',
             SubDBTypeEnum::PostgreSQL => '',
         };
@@ -54,7 +55,7 @@ class DriverPDO implements \Iterator
     private function preConnectionExec(): void
     {
         /** @psalm-suppress TypeDoesNotContainType */
-        match (MainConfig::DB_SUD_DB) {
+        match (Main::DB_SUD_DB()) {
             SubDBTypeEnum::MySQL => null, //$this->DBH->exec("set session wait_timeout = 3600; set session interactive_timeout = 3600;")
             SubDBTypeEnum::PostgreSQL => null,
         };
@@ -109,7 +110,7 @@ class DriverPDO implements \Iterator
         }
     }
 
-    public function query(string $sql, string $param_type = "", ...$params): static
+    public function query(string $sql, string $param_type = "", mixed ...$params): static
     {
         $sql = $this->sql . $sql;
         $this->sql = '';
@@ -136,7 +137,7 @@ class DriverPDO implements \Iterator
                 "[{$this->database}] Statement execution error: {$e}\n$sql");
             switch ($e->getCode()) {
                 case 23000:
-                    throw new DuplicateEntry($this->STH->errorInfo()[2]);
+                    throw new DuplicateEntry($this->STH->errorInfo()[2] ?? 'NULL errorInfo');
                 default:
                     throw new DBException('SQL query error');
             }
@@ -166,7 +167,19 @@ class DriverPDO implements \Iterator
     {
         return $this->STH;
     }
-    // mysqli_result
+    public function nextRowset(): static
+    {
+        $this->STH->nextRowset();
+        return $this;
+    }
+    /**
+     * Количество затронутых строк
+     */
+    public function rowCount(): int
+    {
+        return $this->STH->rowCount();
+    }
+    // alias array[]
     public function result(): array
     {
         return $this->array();
@@ -180,7 +193,9 @@ class DriverPDO implements \Iterator
     // Индексированный массив одной строки (Не подлежит перебору)
     public function row(): array|null
     {
-        return $this->STH->fetch(\PDO::FETCH_NUM) ?: null;
+        /** @var array[]|false */
+        $var = $this->STH->fetch(\PDO::FETCH_NUM);
+        return false !== $var ? $var : null;
     }
     /**
      * Ассоциативный массив одной строки (Не подлежит перебору)
@@ -188,7 +203,9 @@ class DriverPDO implements \Iterator
      */
     public function assoc(): array|null
     {
-        return $this->STH->fetch(\PDO::FETCH_ASSOC) ?: null;
+        /** @var array[]|false */
+        $var = $this->STH->fetch(\PDO::FETCH_ASSOC);
+        return false !== $var ? $var : null;
     }
     // Значение из конкретной колонки, по умолчанию первой
     public function column(int $column = 0): mixed
@@ -240,11 +257,11 @@ class DriverPDO implements \Iterator
      * @template T of object
      * @param class-string<T> $class
      * @param array $constructor_args Аргументы для конструктора передаваемого класса, для заполнения
-     * @return list<T> Возвращает объект с параметрами класса как в БД и заполненными добавочными данными из аргументов констркутора класса
+     * @return list<T>|list<empty> Возвращает объект с параметрами класса как в БД и заполненными добавочными данными из аргументов констркутора класса
      */
     public function objects(string $class = \stdClass::class, array $constructor_args = []): array
     {
-        /** @var list<T> */
+        /** @var list<T>|list<empty> */
         return $this->STH->fetchAll(\PDO::FETCH_CLASS, $class, $constructor_args);
     }
     public function id(): int|string|null

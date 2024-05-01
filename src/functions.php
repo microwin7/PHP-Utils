@@ -77,7 +77,7 @@ if (!function_exists('getClassMethodsAllFromDocComment')) {
         $docComment = $reflectionClass->getDocComment();
         if ($docComment !== false) {
             preg_match_all('/@method\s+([^\r\n\t\f\v(]+)/', $docComment, $matches);
-            if (!empty($matches[1])) {
+            if (isset($matches[1]) && !empty($matches[1])) {
                 return $matches[1];
             }
         }
@@ -142,5 +142,19 @@ if (!function_exists('minifier')) {
         $replace = array('>', '<', '\\1');
         $code = preg_replace($search, $replace, $code);
         return $code;
+    }
+}
+if (!function_exists('convertToBytes')) {
+    function convertToBytes(string $size): int
+    {
+        $unit = strtoupper(substr($size, -1)); // Получаем последний символ (единицу измерения)
+        /** @var int */
+        $number = substr($size, 0, -1); // Получаем число (без последнего символа)
+        return match ($unit) {
+            'K' => $number * 1024,
+            'M' => $number * 1024 * 1024,
+            'G' => $number * 1024 * 1024 * 1024,
+            default => (int) $size
+        };
     }
 }

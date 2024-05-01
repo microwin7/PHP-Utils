@@ -3,6 +3,7 @@
 namespace Microwin7\PHPUtils\Helpers;
 
 use UnexpectedValueException;
+use Microwin7\PHPUtils\Utils\Texture;
 use Microwin7\PHPUtils\Configs\TextureConfig;
 use Microwin7\PHPUtils\Exceptions\FileSystemException;
 
@@ -11,7 +12,7 @@ class FileSystem
     /**
      * @throws FileSystemException
      */
-    public function findFile(string $directory, string $fileName, string $extension): string|null
+    public function findFile(string $directory, string $fileName, ?string $extension = null): string|null
     {
         if ($this->is_dir($directory)) return $this->recursiveSearchNameFileCaseInsensitive($directory, $fileName, $extension, 0);
         else throw new FileSystemException("The folder does not exist or the script does not have read access");
@@ -20,9 +21,9 @@ class FileSystem
      * @return string[]
      * @throws FileSystemException
      */
-    public function findFiles(string $directory, int $level = 1, string $extension = TextureConfig::EXT): array
+    public function findFiles(string $directory, ?string $extension = null, int $level = 1): array
     {
-        if ($this->is_dir($directory)) return $this->recursiveSearchFiles($directory, $level, $extension);
+        if ($this->is_dir($directory)) return $this->recursiveSearchFiles($directory, $extension, $level);
         else throw new FileSystemException("The folder does not exist or the script does not have read access");
     }
     /** @param string|string[] $folders */
@@ -62,8 +63,10 @@ class FileSystem
         }
         return false;
     }
-    public function recursiveSearchNameFileCaseInsensitive(string $directory, string $fileName, string $extension, int $level = -1): string|null
+    public function recursiveSearchNameFileCaseInsensitive(string $directory, string $fileName, ?string $extension = null, int $level = -1): string|null
     {
+        $extension ??= '';
+        empty($extension) ?: ($extension = '.' . $extension);
         try {
             $directory = preg_replace("/\/+$/", "", $directory);
             $iterator = new \RecursiveIteratorIterator(
@@ -80,9 +83,9 @@ class FileSystem
             foreach ($iterator as $path => $obj) {
                 if (!$obj->isDir()) {
                     $basename = pathinfo($path, PATHINFO_BASENAME);
-                    if (strtolower($basename) === strtolower($fileName . '.' . $extension)) {
+                    if (strtolower($basename) === strtolower($fileName . $extension)) {
                         return mb_substr(
-                            mb_stristr($basename, $fileName . '.' . $extension, false, mb_internal_encoding()),
+                            mb_stristr($basename, $fileName . $extension, false, mb_internal_encoding()),
                             0,
                             mb_strlen($fileName, mb_internal_encoding()),
                             mb_internal_encoding()
@@ -98,8 +101,9 @@ class FileSystem
         return null;
     }
     /** @return string[] */
-    private function recursiveSearchFiles(string $directory, int $level = -1, string $extension = ''): array
+    private function recursiveSearchFiles(string $directory, ?string $extension = null, int $level = -1): array
     {
+        $extension ??= '';
         /** @var string[] $filename */
         $filename = [];
         try {

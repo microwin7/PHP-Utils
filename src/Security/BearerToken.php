@@ -2,10 +2,19 @@
 
 namespace Microwin7\PHPUtils\Security;
 
-use Microwin7\PHPUtils\Configs\MainConfig;
+use Microwin7\PHPUtils\Main;
+use Microwin7\PHPUtils\Exceptions\ValidateBearerTokenException;
 
 class BearerToken
 {
+    public function __construct()
+    {
+        if(!static::validateBearer()) throw new ValidateBearerTokenException;
+    }
+    public static function validateBearer(): bool
+    {
+        return static::getBearerToken() === Main::BEARER_TOKEN();
+    }
     /**
      * Getting BearerToken
      * */
@@ -13,39 +22,19 @@ class BearerToken
     {
         $headers = static::get_authorization_header();
         // HEADER: Getting BearerToken from header
-        if (!empty($headers)) {
+        if ($headers !== null && !empty($headers)) {
             if (preg_match('/Bearer\s(\S+)/', $headers, $matches)) {
                 return $matches[1];
             }
         }
         return null;
     }
-    /** 
-     * @deprecated
-     * @return string
-     */
-    public static function getBearer(): string
-    {
-        $headers = array_change_key_case(getallheaders());
-        /** @var string */
-        $authorizationHeader = $headers['authorization'] ?? '';
-
-        if (strlen($authorizationHeader) >= 7) {
-            return substr($authorizationHeader, 7);
-        }
-        return '';
-    }
-
-    public static function validateBearer(): bool
-    {
-        return static::getBearerToken() === MainConfig::BEARER_TOKEN;
-    }
     /**
      * Getting Authorization header
      *
      * @return null|string
      */
-    public static function get_authorization_header(): string|null
+    public static function get_authorization_header(): ?string
     {
         $headers = null;
         if (isset($_SERVER['Authorization'])) {

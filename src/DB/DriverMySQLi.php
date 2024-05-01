@@ -2,13 +2,14 @@
 
 namespace Microwin7\PHPUtils\DB;
 
+use Microwin7\PHPUtils\Main;
 use Microwin7\PHPUtils\Utils\DebugDB;
-use Microwin7\PHPUtils\Configs\MainConfig;
 use Microwin7\PHPUtils\Exceptions\DBException;
 
 /**
  * @template-implements \Iterator<int, array>
  * @deprecated 1.6.0.12
+ * @ignore ОТКЛЮЧЕНО
  */
 class DriverMySQLi implements \Iterator
 {
@@ -27,12 +28,12 @@ class DriverMySQLi implements \Iterator
 	/** @var list<int> */
 	private array $unsetKeys = [];
 
-	public function __construct(string $database = MainConfig::DB_NAME, string $table_prefix = '')
+	public function __construct(?string $database = null, string $table_prefix = '')
 	{
 		$this->table_prefix = $table_prefix;
-		$this->database = $database;
+		$this->database = $database ?? Main::DB_NAME();
 		$this->debug = new DebugDB;
-		$this->mysqli = new \mysqli(MainConfig::DB_HOST, MainConfig::DB_USER, MainConfig::DB_PASS, $database, (int)MainConfig::DB_PORT);
+		$this->mysqli = new \mysqli(Main::DB_HOST(), Main::DB_USER(), Main::DB_PASS(), $database, Main::DB_PORT());
 		if ($this->mysqli->connect_errno) $this->debug->debug("Connect error: {$this->mysqli->connect_error}");
 		$this->mysqli->set_charset("utf8");
 	}
@@ -185,7 +186,7 @@ class DriverMySQLi implements \Iterator
 	 * @template T of object
 	 * @param class-string<T> $class
 	 * @param array $constructor_args Аргументы для конструктора передаваемого класса, для заполнения
-	 * @return list<T> Возвращает объекты с параметрами класса как в БД и заполненными добавочными данными из аргументов констркутора класса
+	 * @return list<T>|list<empty> Возвращает объекты с параметрами класса как в БД и заполненными добавочными данными из аргументов констркутора класса
 	 */
 	public function objects(string $class = \stdClass::class, array $constructor_args = []): array
 	{

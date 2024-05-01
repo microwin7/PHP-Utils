@@ -7,5 +7,5 @@ namespace Microwin7\PHPUtils\DB;
 enum DriverTypeEnum
 {
     case PDO;
-    case MySQLi;
+    // case MySQLi;
 }

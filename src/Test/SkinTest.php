@@ -4,16 +4,12 @@ declare(strict_types=1);
 
 namespace Microwin7\PHPUtils\Test;
 
-use Microwin7\PHPUtils\Rules\Regex;
+use Microwin7\PHPUtils\Main;
 use Microwin7\PHPUtils\Utils\Texture;
-use Microwin7\PHPUtils\Configs\PathConfig;
-use Microwin7\PHPUtils\Configs\TextureConfig;
 use Microwin7\PHPUtils\Test\RequestParamsTest;
-use function Microwin7\PHPUtils\str_ends_with_slash;
 use Microwin7\PHPUtils\Contracts\Texture\Models\Skin;
-use Microwin7\PHPUtils\Contracts\Texture\Enum\MethodTypeEnum;
-use Microwin7\PHPUtils\Contracts\Texture\Enum\ResponseTypeEnum;
 use Microwin7\PHPUtils\Contracts\Texture\Enum\TextureStorageTypeEnum;
+use Microwin7\PHPUtils\Utils\Path;
 
 final class SkinTest extends Skin
 {
@@ -22,7 +18,7 @@ final class SkinTest extends Skin
     {
         $json = [
             'url' => static::urlComplete(TextureStorageTypeEnum::COLLECTION, (string)RequestParamsTest::fromRequest()),
-            'digest' => (TextureConfig::LEGACY_DIGEST ? Texture::digest_legacy($this->data) :Texture::digest($this->data)),
+            'digest' => (Texture::LEGACY_DIGEST() ? Texture::digest_legacy($this->data) :Texture::digest($this->data)),
         ];
         if ($this->isSlim) $json['metadata'] = ['model' => 'slim'];
         return $json;
@@ -31,7 +27,7 @@ final class SkinTest extends Skin
     {
         return match ($textureStorageType) {
             TextureStorageTypeEnum::MOJANG => $url,
-            default => str_ends_with_slash(PathConfig::APP_URL) . 'Config::SCRIPT_URL' . $url, // GET Params
+            default => Main::getPublicApplicationURL() . Path::SCRIPT_DIR() . $url, // GET Params
         };
     }
 }

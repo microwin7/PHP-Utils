@@ -40,7 +40,7 @@ abstract class RequestParamsAbstract implements RequestParamsInterface
     }
     public function __isset(string $name): bool
     {
-        return (bool) $this->arguments[$name];
+        return isset($this->arguments[$name]);
     }
     public function setVariable(string $name, string|null $value): static
     {

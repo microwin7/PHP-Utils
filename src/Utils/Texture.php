@@ -2,120 +2,111 @@
 
 namespace Microwin7\PHPUtils\Utils;
 
+use Microwin7\PHPUtils\Main;
+use Microwin7\PHPUtils\Utils\Path;
 use Microwin7\PHPUtils\Configs\TextureConfig;
-use Microwin7\PHPUtils\Contracts\User\UserStorageTypeEnum;
+use function Microwin7\PHPUtils\ar_slash_string;
+use function Microwin7\PHPUtils\convertToBytes;
+// use function Microwin7\PHPUtils\str_ends_with_slash;
 use Microwin7\PHPUtils\Exceptions\TextureSizeException;
 use Microwin7\PHPUtils\Exceptions\TextureSizeHDException;
-use function Microwin7\PHPUtils\str_ends_with_slash;
-use function Microwin7\PHPUtils\ar_slash_string;
+use Microwin7\PHPUtils\Contracts\User\UserStorageTypeEnum;
+use Microwin7\PHPUtils\Contracts\Texture\Enum\ResponseTypeEnum;
+use Microwin7\PHPUtils\Contracts\Texture\Enum\TextureStorageTypeEnum;
 
-class Texture
+class Texture extends TextureConfig
 {
-    /**
-     * Получение ссылки пути хранения скина
-     *
-     * @param string $login
-     * @return string
-     */
-    public static function getSkinPath(string $login): string
+    /** BASE DIR */
+    public static function STORAGE_DIR(): string
     {
-        return self::getSkinPathStorage() . $login . self::EXT();
+        $STORAGE_DIR = getenv()['STORAGE_DIR'] ?? '';
+        $STORAGE_DIR = !empty($STORAGE_DIR) ? $STORAGE_DIR : TextureStorageTypeEnum::getNameRequestVariable();
+        return ar_slash_string($STORAGE_DIR);
     }
-    /**
-     * Получение ссылки пути хранения плаща
-     *
-     * @param string $login
-     * @return string
-     */
-    public static function getCapePath(string $login): string
+    /** BASE DIR */
+    public static function TEXTURE_STORAGE_DIR(ResponseTypeEnum|TextureStorageTypeEnum $type): string
     {
-        return self::getCapePathStorage() . $login . self::EXT();
+        return match ($type) {
+            ResponseTypeEnum::SKIN, ResponseTypeEnum::CAPE,
+            ResponseTypeEnum::AVATAR, ResponseTypeEnum::FRONT,
+            ResponseTypeEnum::FRONT_CAPE, ResponseTypeEnum::FRONT_WITH_CAPE,
+            ResponseTypeEnum::BACK, ResponseTypeEnum::BACK_CAPE,
+            ResponseTypeEnum::BACK_WITH_CAPE, ResponseTypeEnum::CAPE_RESIZE,
+            TextureStorageTypeEnum::COLLECTION => self::STORAGE_DIR() . ar_slash_string(getenv()['TEXTURE_' . $type->name . '_PATH'] ?? (strtolower($type->name) . 's')),
+            default => throw new \InvalidArgumentException(sprintf('Un-supported TEXTURE_STORAGE_DIR: %s', $type->name))
+        };
     }
-    /**
-     * Получение ссылки пути хранения скина/плаща с указанием вызываемого типа
-     *
-     * @param string $login
-     * @param key-of<TextureConfig::TEXTURE_PATH> $type Допустимые параметры: <SKIN|CAPE>
-     * @return string
-     */
-    public static function getTexturePath(string $login, string $type): string
+    public static function EXTENSTION(): string
     {
-        return self::getTexturePathStorage($type) . $login . self::EXT();
+        return empty($EXT = getenv()['TEXTURE_EXTENSTION'] ?? TextureConfig::TEXTURE_EXTENSTION) ? '' : '.' . $EXT;
     }
 
-    public static function getSkinPathStorage(): string
+    /** FOR URL ONLY */
+    public static function TEXTURE_STORAGE_PATH(ResponseTypeEnum|TextureStorageTypeEnum $type): string
     {
-        return str_ends_with_slash(TextureConfig::SKIN_PATH);
+        return Path::SCRIPT_DIR() . self::TEXTURE_STORAGE_DIR($type);
     }
-    public static function getCapePathStorage(): string
+    /** FOR URL ONLY */
+    public static function TEXTURE_STORAGE_URL(ResponseTypeEnum|TextureStorageTypeEnum $type): string
     {
-        return str_ends_with_slash(TextureConfig::CAPE_PATH);
+        return Main::getPublicApplicationURL() . self::TEXTURE_STORAGE_PATH($type);
     }
-    /**
-     * @param key-of<TextureConfig::TEXTURE_PATH> $type
-     * @return string
-     */
-    public static function getTexturePathStorage(string $type): string
+    /** FOR URL ONLY */
+    public static function PATH_URL(ResponseTypeEnum|TextureStorageTypeEnum $type, string $login, ?string $extension = null): string
     {
-        return str_ends_with_slash(TextureConfig::TEXTURE_PATH[strtoupper($type)]);
+        $extension ??= self::EXTENSTION();
+        return self::TEXTURE_STORAGE_URL($type) . $login . $extension;
     }
 
-    public static function getSkinUrl(string $login): string
+    /** FOR PHP ONLY */
+    public static function TEXTURE_STORAGE_FULL_PATH(ResponseTypeEnum|TextureStorageTypeEnum $type): string
     {
-        return Path::getAppUrl() .
-            ar_slash_string(TextureConfig::SKIN_URL_PATH) .
-            $login . self::EXT();
+        return Path::ROOT_FOLDER() . self::TEXTURE_STORAGE_DIR($type);
     }
-    public static function getCapeUrl(string $login): string
+    /** FOR PHP ONLY */
+    public static function PATH(ResponseTypeEnum|TextureStorageTypeEnum $type, string $login, ?string $extension = null): string
     {
-        return Path::getAppUrl() .
-            ar_slash_string(TextureConfig::CAPE_URL_PATH) .
-            $login . self::EXT();
+        $extension ??= self::EXTENSTION();
+        return self::TEXTURE_STORAGE_FULL_PATH($type) . $login . $extension;
     }
-    /**
-     * @param int $width
-     * @param int $height
-     * @param key-of<TextureConfig::SIZE> $type
-     * @return true
-     * 
-     * @throws TextureSizeException
-     */
-    public static function validateSize(int $width, int $height, string $type): true
+
+    /** @throws TextureSizeException */
+    public static function validateSize(int $width, int $height, ResponseTypeEnum $type = ResponseTypeEnum::SKIN): true
     {
         $valid_size = false;
-        foreach (TextureConfig::SIZE[strtoupper($type)] as $value) {
+        foreach (TextureConfig::SIZE($type) as $value) {
             if ($value['w'] == $width && $value['h'] == $height) {
                 $valid_size = true;
             }
         }
         return $valid_size ?: throw new TextureSizeException;
     }
-    /**
-     * @param int $width
-     * @param int $height
-     * @param key-of<TextureConfig::SIZE_WITH_HD> $type
-     * @return true
-     * 
-     * @throws TextureSizeHDException
-     */
-    public static function validateHDSize(int $width, int $height, string $type): true
+    /** @throws TextureSizeHDException */
+    public static function validateHDSize(int $width, int $height, ResponseTypeEnum $type = ResponseTypeEnum::SKIN): true
     {
         $valid_size = false;
-        foreach (TextureConfig::SIZE_WITH_HD[strtoupper($type)] as $value) {
+        foreach (TextureConfig::SIZE_WITH_HD($type) as $value) {
             if ($value['w'] == $width && $value['h'] == $height) {
                 $valid_size = true;
             }
         }
         return $valid_size ?: throw new TextureSizeHDException;
     }
-    /**
-     * @return string
-     *
-     * @psalm-return ''|'.png'
-     */
-    public static function EXT(): string
+    public static function LEGACY_DIGEST(): bool
     {
-        return empty(TextureConfig::EXT) ? '' : '.' . TextureConfig::EXT;
+        return ($ENV = getenv(__FUNCTION__)) === false ? parent::LEGACY_DIGEST : filter_var($ENV, FILTER_VALIDATE_BOOLEAN);
+    }
+    public static function MAX_SIZE_BYTES(): int
+    {
+        return ($ENV = getenv(__FUNCTION__)) === false ? parent::MAX_SIZE_BYTES : convertToBytes($ENV);
+    }
+    public static function SKIN_DEFAULT(): string
+    {
+        return base64_decode(getenv()[__FUNCTION__] ?? parent::SKIN_DEFAULT) ?: throw new \InvalidArgumentException('Error base64_decode: ' . __FUNCTION__);
+    }
+    public static function CAPE_DEFAULT(): string
+    {
+        return base64_decode(getenv()[__FUNCTION__] ?? parent::CAPE_DEFAULT) ?: throw new \InvalidArgumentException('Error base64_decode: ' . __FUNCTION__);
     }
     public static function digest(string $data, UserStorageTypeEnum $hashType = UserStorageTypeEnum::DB_SHA256): string
     {

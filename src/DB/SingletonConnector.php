@@ -8,15 +8,15 @@ use Microwin7\PHPUtils\Exceptions\ServerNotFoundException;
 
 class SingletonConnector
 {
-    /** @var array<string, DriverPDO|DriverMySQLi> */
+    /** @var array<string, DriverPDO> */
     private static array $database = [];
 
-    public function __get(string $database): DriverPDO|DriverMySQLi
+    public function __get(string $database): DriverPDO
     {
         if (array_key_exists($database, self::$database)) return self::$database[$database];
         return $this->getConnect($database);
     }
-    public static function get(string $database = ''): DriverPDO|DriverMySQLi
+    public static function get(string $database = ''): DriverPDO
     {
         if (array_key_exists($database, self::$database)) return self::$database[$database];
         return self::getConnect($database);
@@ -36,14 +36,14 @@ class SingletonConnector
     {
         throw new \Exception("Cannot unserialize a singleton.");
     }
-    private static function getConnect(string $database): DriverPDO|DriverMySQLi
+    private static function getConnect(string $database): DriverPDO
     {
         $module = [];
-        if (empty($database) || $database == MainConfig::DB_NAME) $database = MainConfig::DB_NAME;
+        if (empty($database) || $database == Main::DB_NAME()) $database = Main::DB_NAME();
         else {
             try {
                 /** @psalm-suppress RedundantFunctionCall */
-                $database = strtolower(MainConfig::DB_PREFIX . Main::getServerWithoutDefault($database));
+                $database = strtolower(Main::DB_PREFIX_SERVERS() . Main::getServerWithoutDefault($database));
             } catch (ServerNotFoundException $e) {
                 $modules_keys_lower_case = array_change_key_case(MainConfig::MODULES);
                 $key_exists = array_key_exists(strtolower($database), $modules_keys_lower_case);
@@ -57,13 +57,14 @@ class SingletonConnector
             }
         }
         if (array_key_exists($database, self::$database)) return self::$database[$database];
-        /**
-         * @var string $module['prefix']
-         * @psalm-suppress TypeDoesNotContainType
-         */
-        return self::$database[$database] = match (MainConfig::DB_DRIVER) {
-            DriverTypeEnum::MySQLi => new DriverMySQLi($database, $module['prefix'] ?? ''),
-            DriverTypeEnum::PDO => new DriverPDO($database, $module['prefix'] ?? ''),
-        };
+        return new DriverPDO($database, $module['prefix'] ?? '');
+        // /**
+        //  * @var string $module['prefix']
+        //  * @psalm-suppress TypeDoesNotContainType
+        //  */
+        // return self::$database[$database] = match (MainConfig::DB_DRIVER) {
+        //     DriverTypeEnum::MySQLi => new DriverMySQLi($database, $module['prefix'] ?? ''),
+        //     DriverTypeEnum::PDO => new DriverPDO($database, $module['prefix'] ?? ''),
+        // };
     }
 }

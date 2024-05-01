@@ -6,7 +6,7 @@ use Microwin7\PHPUtils\Exceptions\NumberFormatException;
 
 class PHPass
 {
-    private const PHPASS_ITOA64 = './0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+    private const string PHPASS_ITOA64 = './0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 
     /**
      * @return bool

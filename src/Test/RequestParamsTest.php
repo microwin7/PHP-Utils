@@ -31,8 +31,8 @@ final class RequestParamsTest extends RequestParamsAbstract
          * @var string|null $this->login
          */
         return '?' .
-            'type=' . $this->responseType->name .
-            (null === $this->textureStorageType ? '' : '&storage=' . $this->textureStorageType->name) .
+            ResponseTypeEnum::getNameRequestVariable() . '=' . $this->responseType->name .
+            (null === $this->textureStorageType ? '' : '&' . TextureStorageTypeEnum::getNameRequestVariable() . '=' . $this->textureStorageType->name) .
             (null === $this->login ? '' : '&login=' . $this->login);
     }
 }

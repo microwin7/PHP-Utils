@@ -3,11 +3,17 @@
 namespace Microwin7\PHPUtils;
 
 use Microwin7\PHPUtils\Configs\MainConfig;
+use Microwin7\PHPUtils\DB\SubDBTypeEnum;
 use Microwin7\PHPUtils\Exceptions\ServerNotFoundException;
 use Microwin7\PHPUtils\Exceptions\AliasServerNotFoundException;
+use function Microwin7\PHPUtils\str_ends_with_slash;
 
 class Main extends MainConfig
 {
+    public static function getPublicApplicationURL(bool $needle_ends_with_slash = TRUE): string
+    {
+        return str_ends_with_slash(getenv()['APP_URL'] ?? parent::APP_URL, $needle_ends_with_slash);
+    }
     /**
      * Поиск и возвращение имени сервера, если оно есть в алиас или главном имени, возвращает главное имя. Если сервер не найден, возвращает {@link \Microwin7\PHPUtils\Exceptions\ServerNotFoundException}
      *
@@ -109,12 +115,71 @@ class Main extends MainConfig
             return $server_name = array_key_first(parent::SERVERS);
         }
     }
-    public static function getPublicKeyFromBase64(): string
+    public static function DB_HOST(): string
     {
-        return "-----BEGIN PUBLIC KEY-----\n" . chunk_split(parent::ECDSA256_PUBLIC_KEY_BASE64, 64, "\n") . "-----END PUBLIC KEY-----";
+        return getenv()[__FUNCTION__] ?? parent::DB_HOST;
     }
-    public static function getPublicKeyFromBytes(): string
+    public static function DB_NAME(): string
     {
-        return "-----BEGIN PUBLIC KEY-----\n" . chunk_split(base64_encode(file_get_contents(parent::ECDSA256_PUBLIC_KEY_PATH)), 64, "\n") . "-----END PUBLIC KEY-----";
+        return getenv()[__FUNCTION__] ?? parent::DB_NAME;
+    }
+    public static function DB_USER(): string
+    {
+        return getenv()[__FUNCTION__] ?? parent::DB_USER;
+    }
+    public static function DB_PASS(): string
+    {
+        return getenv()[__FUNCTION__] ?? parent::DB_PASS;
+    }
+    /** @throws \RuntimeException */
+    public static function DB_PORT(): int
+    {
+        return ($ENV = getenv(__FUNCTION__)) === false ?
+            parent::DB_PORT : (
+                ($ENV_INT = filter_var($ENV, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0, 'max_range' => 65535]])) === false ?
+                throw new \RuntimeException(sprintf('Invalid value set in environment %s: %s', __FUNCTION__, $ENV)) :
+                $ENV_INT
+            );
+    }
+    /** @throws \RuntimeException */
+    public static function DB_SUD_DB(): SubDBTypeEnum
+    {
+        return ($ENV = getenv(__FUNCTION__)) === false ?
+            parent::DB_SUD_DB : (
+                ($ENUM = SubDBTypeEnum::tryFromString($ENV)) === null ?
+                throw new \RuntimeException(sprintf('Invalid value set in environment %s: %s', __FUNCTION__, $ENV)) :
+                $ENUM
+            );
+    }
+    public static function DB_PREFIX_SERVERS(): string
+    {
+        return getenv()[__FUNCTION__] ?? parent::DB_PREFIX_SERVERS;
+    }
+    public static function DB_DEBUG(): bool
+    {
+        return ($ENV = getenv(__FUNCTION__)) === false ? parent::DB_DEBUG : filter_var($ENV, FILTER_VALIDATE_BOOLEAN);
+    }
+    public static function BEARER_TOKEN(): string|null
+    {
+        return ($ENV = getenv(__FUNCTION__)) === false ? parent::BEARER_TOKEN : (strtolower($ENV) === 'null' ? null : $ENV);
+    }
+    public static function PRIVATE_API_KEY(): string
+    {
+        return getenv()[__FUNCTION__] ?? parent::PRIVATE_API_KEY;
+    }
+    public static function SENTRY_ENABLE(): bool
+    {
+        return ($ENV = getenv(__FUNCTION__)) === false ? parent::SENTRY_ENABLE : filter_var($ENV, FILTER_VALIDATE_BOOLEAN);
+    }
+    public static function SENTRY_DSN(): string|null
+    {
+        return ($ENV = getenv(__FUNCTION__)) === false ? parent::SENTRY_DSN : (strtolower($ENV) === 'null' ? null : $ENV);
+    }
+    public static function getLaunchServerPublicKey(): string
+    {
+        return
+            "-----BEGIN PUBLIC KEY-----\n" .
+            chunk_split((getenv()['LAUNCH_SERVER_ECDSA256_PUBLIC_KEY_BASE64'] ?? parent::LAUNCH_SERVER_ECDSA256_PUBLIC_KEY_BASE64), 64, "\n") .
+            "-----END PUBLIC KEY-----";
     }
 }

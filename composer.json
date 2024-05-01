@@ -7,12 +7,11 @@
         "ext-gd": "*",
         "ext-mbstring": "*",
         "ext-pdo": "*",
-        "ext-pdo_pgsql": "*",
-        "ext-pdo_mysql": "*",
         "ext-pgsql": "*",
         "ext-mysqli": "*",
         "ext-json": "*",
-        "microwin7/rcon": "^1.1"
+        "microwin7/rcon": "^1.1",
+        "sentry/sentry": "^4.7"
     },
     "autoload": {
         "psr-4": {
@@ -33,7 +32,7 @@
         "issues": "https://github.com/microwin7/PHPUtil/issues",
         "source": "https://github.com/microwin7/PHPUtil/tree/master"
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "require-dev": {
         "vimeo/psalm": "5.x-dev"
     }

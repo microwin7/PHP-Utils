@@ -2,14 +2,13 @@
 
 namespace Microwin7\PHPUtils\Utils;
 
-use Microwin7\PHPUtils\Configs\MainConfig;
-use Microwin7\PHPUtils\Configs\PathConfig;
+use Microwin7\PHPUtils\Main;
 
 class DebugDB
 {
 	private function file_put_contents(string $path, string $message): void
 	{
-		$directory = PathConfig::DB_LOG_FOLDER;
+		$directory = Path::DB_LOG_FOLDER();
 		if (defined('DB_MODULE_NAME')) {
 			if (defined('DB_MODULE_COMPONENT_NAME')) $directory .= constant('DB_MODULE_NAME') . '/' . constant('DB_MODULE_COMPONENT_NAME') . '/';
 			else $directory .= constant('DB_MODULE_NAME') . '/';
@@ -21,16 +20,16 @@ class DebugDB
 	public function debug(string $message): void
 	{
 		/** @psalm-suppress RedundantCondition */
-		if (MainConfig::DB_DEBUG) $this->file_put_contents(__FUNCTION__, $message);
+		if (Main::DB_DEBUG()) $this->file_put_contents(__FUNCTION__, $message);
 	}
 	public function debug_error(string $message): void
 	{
 		/** @psalm-suppress RedundantCondition */
-		if (MainConfig::DB_DEBUG) $this->file_put_contents(__FUNCTION__, $message);
+		if (Main::DB_DEBUG()) $this->file_put_contents(__FUNCTION__, $message);
 	}
 	public function debug_extra(string $message, string $folder= 'extra'): void
     {
 		/** @psalm-suppress RedundantCondition */
-		if (MainConfig::DB_DEBUG) $this->file_put_contents($folder, $message);
+		if (Main::DB_DEBUG()) $this->file_put_contents($folder, $message);
 	}
 }

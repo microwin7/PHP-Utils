@@ -14,7 +14,7 @@ use function Microwin7\PHPUtils\getClassStaticMethodsFromAnnotations;
  * @method static code(int $code)
  * @method static code_response(int $code_response)
  * @method static extra(array $array)
- * @method static success(?string $message = null, bool $need_success = false)
+ * @method never success(?string $message = null, bool $need_success = false)
  * @method never failed(?string $message = null, ?string $error = null, bool $need_success = false, int $code = 0, int $code_response = 400)
  * @method never response(mixed $data = null)
  * 
@@ -23,7 +23,7 @@ use function Microwin7\PHPUtils\getClassStaticMethodsFromAnnotations;
  * @method static void code(int $code)
  * @method static void code_response(int $code_response)
  * @method static void extra(array $array)
- * @method static void success(?string $message = null, bool $need_success = false)
+ * @method static never success(?string $message = null, bool $need_success = false)
  * @method static never failed(?string $message = null, ?string $error = null, bool $need_success = false, int $code = 0, int $code_response = 400)
  * @method static string json_encode(mixed $data = null)
  * @method static never response(mixed $data = null)

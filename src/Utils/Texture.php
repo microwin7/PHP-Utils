@@ -41,23 +41,6 @@ class Texture extends TextureConfig
         return empty($EXT = getenv()['TEXTURE_EXTENSTION'] ?? TextureConfig::TEXTURE_EXTENSTION) ? '' : '.' . $EXT;
     }
 
-    /** FOR URL ONLY */
-    public static function TEXTURE_STORAGE_PATH(ResponseTypeEnum|TextureStorageTypeEnum $type): string
-    {
-        return Path::SCRIPT_DIR() . self::TEXTURE_STORAGE_DIR($type);
-    }
-    /** FOR URL ONLY */
-    public static function TEXTURE_STORAGE_URL(ResponseTypeEnum|TextureStorageTypeEnum $type): string
-    {
-        return Main::getPublicApplicationURL() . self::TEXTURE_STORAGE_PATH($type);
-    }
-    /** FOR URL ONLY */
-    public static function PATH_URL(ResponseTypeEnum|TextureStorageTypeEnum $type, string $login, ?string $extension = null): string
-    {
-        $extension ??= self::EXTENSTION();
-        return self::TEXTURE_STORAGE_URL($type) . $login . $extension;
-    }
-
     /** FOR PHP ONLY */
     public static function TEXTURE_STORAGE_FULL_PATH(ResponseTypeEnum|TextureStorageTypeEnum $type): string
     {

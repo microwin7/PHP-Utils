@@ -13,13 +13,13 @@ class Path extends PathConfig
     {
         return str_ends_with_slash(getenv()['ROOT_FOLDER'] ?? parent::ROOT_FOLDER);
     }
-    /** SET ENV SCRIPT_DIR
+    /** SET ENV SCRIPT_PATH
      * Example:
-     * getenv()['SCRIPT_DIR'] ?? putenv('SCRIPT_DIR=texture-provider');
+     * getenv()['SCRIPT_PATH'] ?? putenv('SCRIPT_PATH=texture-provider');
      */
-    public static function SCRIPT_DIR(): string
+    public static function SCRIPT_PATH(): string
     {
-        return ar_slash_string(getenv()['SCRIPT_DIR'] ?? throw new \RuntimeException('NEED SET SCRIPT_DIR ENV'));
+        return ar_slash_string(getenv()['SCRIPT_PATH'] ?? throw new \RuntimeException('NEED SET SCRIPT_PATH ENV'));
     }
     public static function DB_LOG_FOLDER(): string
     {
@@ -39,7 +39,7 @@ class Path extends PathConfig
     }
     public static function URL_ITEM_SHOP_IMAGES(string $image_name, string $category): string
     {
-        return Main::getPublicApplicationURL() . self::SITE_TEMPLATES_FOLDER() . self::ITEM_SHOP_PATH_IN_TEMPLATES() .
+        return Main::getApplicationURL() . self::SITE_TEMPLATES_FOLDER() . self::ITEM_SHOP_PATH_IN_TEMPLATES() .
             (empty($category) ?: ar_slash_string($category)) .
             (empty($image_name) ?: $image_name);
     }

@@ -2,17 +2,22 @@
 
 namespace Microwin7\PHPUtils;
 
-use Microwin7\PHPUtils\Configs\MainConfig;
+use Microwin7\PHPUtils\Utils\Path;
 use Microwin7\PHPUtils\DB\SubDBTypeEnum;
+use Microwin7\PHPUtils\Configs\MainConfig;
+use function Microwin7\PHPUtils\str_ends_with_slash;
 use Microwin7\PHPUtils\Exceptions\ServerNotFoundException;
 use Microwin7\PHPUtils\Exceptions\AliasServerNotFoundException;
-use function Microwin7\PHPUtils\str_ends_with_slash;
 
 class Main extends MainConfig
 {
-    public static function getPublicApplicationURL(bool $needle_ends_with_slash = TRUE): string
+    public static function getApplicationURL(bool $needle_ends_with_slash = TRUE): string
     {
         return str_ends_with_slash(getenv()['APP_URL'] ?? parent::APP_URL, $needle_ends_with_slash);
+    }
+    public static function getScriptURL(): string
+    {
+        return self::getApplicationURL() . Path::SCRIPT_PATH();
     }
     /**
      * Поиск и возвращение имени сервера, если оно есть в алиас или главном имени, возвращает главное имя. Если сервер не найден, возвращает {@link \Microwin7\PHPUtils\Exceptions\ServerNotFoundException}
@@ -22,7 +27,7 @@ class Main extends MainConfig
      * 
      * @throws ServerNotFoundException
      */
-    public static function getServerWithoutDefault(string $server_name = '')
+    public static function getServerWithoutDefault(string $server_name = ''): string
     {
         $servers_list = [];
         $alias_list = [];
@@ -61,7 +66,7 @@ class Main extends MainConfig
      * 
      * @throws AliasServerNotFoundException
      */
-    public static function getAliasServerWithoutDefault(string $server_name = '')
+    public static function getAliasServerWithoutDefault(string $server_name = ''): string
     {
         $alias_list = [];
         foreach (parent::SERVERS as $v) {
@@ -97,7 +102,7 @@ class Main extends MainConfig
     {
         try {
             return self::getServerWithoutDefault($server_name);
-        } catch (\Microwin7\PHPUtils\Exceptions\ServerNotFoundException $e) {
+        } catch (\Microwin7\PHPUtils\Exceptions\ServerNotFoundException) {
             return array_key_first(parent::SERVERS);
         }
     }
@@ -107,11 +112,11 @@ class Main extends MainConfig
      * @param string $server_name Передаётся переменная по ссылке, будет перезаписана вне функции
      * @return key-of<MainConfig::SERVERS> Возвращает строку найденного имя сервера с учётом регистра
      */
-    public static function getCorrectServer(&$server_name = '')
+    public static function getCorrectServer(&$server_name = ''): string
     {
         try {
             return $server_name = self::getServerWithoutDefault($server_name);
-        } catch (\Microwin7\PHPUtils\Exceptions\ServerNotFoundException $e) {
+        } catch (\Microwin7\PHPUtils\Exceptions\ServerNotFoundException) {
             return $server_name = array_key_first(parent::SERVERS);
         }
     }

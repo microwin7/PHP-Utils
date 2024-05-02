@@ -85,11 +85,11 @@ class ExceptionHandler
         }
         if ($e instanceof \ErrorException) {
             if (Main::SENTRY_ENABLE()) \Sentry\captureException($e);
-            JsonResponse::failed(error: 'ErrorException');
+            $this->error('ErrorException');
         }
         if ($e instanceof \Throwable) {
             if (Main::SENTRY_ENABLE()) \Sentry\captureException($e);
-            JsonResponse::failed(error: $e->getMessage());
+            $this->error($e);
         }
     }
     private function error(\Throwable|string $error): never

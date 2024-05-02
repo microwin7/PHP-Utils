@@ -27,7 +27,7 @@ final class SkinTest extends Skin
     {
         return match ($textureStorageType) {
             TextureStorageTypeEnum::MOJANG => $url,
-            default => Main::getPublicApplicationURL() . Path::SCRIPT_DIR() . $url, // GET Params
+            default => Main::getApplicationURL() . Path::SCRIPT_PATH() . $url, // GET Params
         };
     }
 }

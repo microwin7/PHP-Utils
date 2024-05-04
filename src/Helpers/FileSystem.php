@@ -3,8 +3,6 @@
 namespace Microwin7\PHPUtils\Helpers;
 
 use UnexpectedValueException;
-use Microwin7\PHPUtils\Utils\Texture;
-use Microwin7\PHPUtils\Configs\TextureConfig;
 use Microwin7\PHPUtils\Exceptions\FileSystemException;
 
 class FileSystem
@@ -66,7 +64,6 @@ class FileSystem
     public function recursiveSearchNameFileCaseInsensitive(string $directory, string $fileName, ?string $extension = null, int $level = -1): string|null
     {
         $extension ??= '';
-        empty($extension) ?: ($extension = '.' . $extension);
         try {
             $directory = preg_replace("/\/+$/", "", $directory);
             $iterator = new \RecursiveIteratorIterator(
@@ -104,6 +101,7 @@ class FileSystem
     private function recursiveSearchFiles(string $directory, ?string $extension = null, int $level = -1): array
     {
         $extension ??= '';
+        $extension = str_replace('.', '', $extension);
         /** @var string[] $filename */
         $filename = [];
         try {

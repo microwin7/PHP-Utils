@@ -19,7 +19,7 @@ class Path extends PathConfig
      */
     public static function SCRIPT_PATH(): string
     {
-        return ar_slash_string(getenv()['SCRIPT_PATH'] ?? throw new \RuntimeException('NEED SET SCRIPT_PATH ENV'));
+        return ($ENV = getenv(__FUNCTION__)) === false ? '' : (empty($ENV) ? '' : ar_slash_string($ENV));
     }
     public static function DB_LOG_FOLDER(): string
     {

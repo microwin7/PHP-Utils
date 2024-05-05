@@ -4,6 +4,7 @@ namespace Microwin7\PHPUtils;
 
 use Microwin7\PHPUtils\Utils\Path;
 use Microwin7\PHPUtils\DB\SubDBTypeEnum;
+use Microwin7\PHPUtils\DB\DriverTypeEnum;
 use Microwin7\PHPUtils\Configs\MainConfig;
 use function Microwin7\PHPUtils\str_ends_with_slash;
 use Microwin7\PHPUtils\Exceptions\ServerNotFoundException;
@@ -11,9 +12,45 @@ use Microwin7\PHPUtils\Exceptions\AliasServerNotFoundException;
 
 class Main extends MainConfig
 {
+    /**
+     * WEB адресс приложения
+     * Вид: '<http|https>://<IP|IP:PORT|DOMAIN>/'
+     * Пример: 'http://127.0.0.1:80/'
+     * Use Main::getPublicApplicationURL()
+     */
+    private const string APP_URL = 'http://127.0.0.1:80/';
+    // Подключение к БД сайта
+    private const string DB_HOST = 'localhost';
+    private const string DB_NAME = 'test';
+    private const string DB_USER = 'test';
+    private const string DB_PASS = 'test';
+    private const int DB_PORT = 3306;
+    /**
+     * НЕ МЕНЯТЬ, ЕДИНСТВЕННЫЙ ПОДДЕРЖИВАЕМЫЙ ДРАЙВЕР
+     * @deprecated v1.7.0.3
+     * DriverTypeEnum::PDO [SubDBTypeEnum::MySQL, SubDBTypeEnum::PostgreSQL]
+     */
+    public const DriverTypeEnum DB_DRIVER = DriverTypeEnum::PDO;
+    /**
+     * DSN префикс Sub DB
+     * SubDBTypeEnum::MySQL
+     * SubDBTypeEnum::PostgreSQL
+     */
+    private const SubDBTypeEnum DB_SUD_DB = SubDBTypeEnum::MySQL;
+    // Префикс БД для SERVERS
+    private const string DB_PREFIX_SERVERS = 'server_';
+    // Запись в файлы лога SQL запросов и их ошибок
+    private const bool DB_DEBUG = true;
+    private const string|null BEARER_TOKEN = null;
+    private const string PRIVATE_API_KEY = '';
+    // https://base64.guru/converter/encode/file
+    private const string LAUNCH_SERVER_ECDSA256_PUBLIC_KEY_BASE64 = 'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEJDi51DKs5f6ERSrDDjns00BkI963L9OS9wLA2Ak/nACZCgQma+FsTsbYtZQm4nk+rtabM8b9JgzSi3sPINb8fg==';
+    private const bool SENTRY_ENABLE = false;
+    private const string|null SENTRY_DSN = null;
+
     public static function getApplicationURL(bool $needle_ends_with_slash = TRUE): string
     {
-        return str_ends_with_slash(getenv()['APP_URL'] ?? parent::APP_URL, $needle_ends_with_slash);
+        return str_ends_with_slash(getenv()['APP_URL'] ?? self::APP_URL, $needle_ends_with_slash);
     }
     public static function getScriptURL(): string
     {
@@ -122,25 +159,25 @@ class Main extends MainConfig
     }
     public static function DB_HOST(): string
     {
-        return getenv()[__FUNCTION__] ?? parent::DB_HOST;
+        return getenv()[__FUNCTION__] ?? self::DB_HOST;
     }
     public static function DB_NAME(): string
     {
-        return getenv()[__FUNCTION__] ?? parent::DB_NAME;
+        return getenv()[__FUNCTION__] ?? self::DB_NAME;
     }
     public static function DB_USER(): string
     {
-        return getenv()[__FUNCTION__] ?? parent::DB_USER;
+        return getenv()[__FUNCTION__] ?? self::DB_USER;
     }
     public static function DB_PASS(): string
     {
-        return getenv()[__FUNCTION__] ?? parent::DB_PASS;
+        return getenv()[__FUNCTION__] ?? self::DB_PASS;
     }
     /** @throws \RuntimeException */
     public static function DB_PORT(): int
     {
         return ($ENV = getenv(__FUNCTION__)) === false ?
-            parent::DB_PORT : (
+            self::DB_PORT : (
                 ($ENV_INT = filter_var($ENV, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0, 'max_range' => 65535]])) === false ?
                 throw new \RuntimeException(sprintf('Invalid value set in environment %s: %s', __FUNCTION__, $ENV)) :
                 $ENV_INT
@@ -150,7 +187,7 @@ class Main extends MainConfig
     public static function DB_SUD_DB(): SubDBTypeEnum
     {
         return ($ENV = getenv(__FUNCTION__)) === false ?
-            parent::DB_SUD_DB : (
+            self::DB_SUD_DB : (
                 ($ENUM = SubDBTypeEnum::tryFromString($ENV)) === null ?
                 throw new \RuntimeException(sprintf('Invalid value set in environment %s: %s', __FUNCTION__, $ENV)) :
                 $ENUM
@@ -158,33 +195,33 @@ class Main extends MainConfig
     }
     public static function DB_PREFIX_SERVERS(): string
     {
-        return getenv()[__FUNCTION__] ?? parent::DB_PREFIX_SERVERS;
+        return getenv()[__FUNCTION__] ?? self::DB_PREFIX_SERVERS;
     }
     public static function DB_DEBUG(): bool
     {
-        return ($ENV = getenv(__FUNCTION__)) === false ? parent::DB_DEBUG : filter_var($ENV, FILTER_VALIDATE_BOOLEAN);
+        return ($ENV = getenv(__FUNCTION__)) === false ? self::DB_DEBUG : filter_var($ENV, FILTER_VALIDATE_BOOLEAN);
     }
     public static function BEARER_TOKEN(): string|null
     {
-        return ($ENV = getenv(__FUNCTION__)) === false ? parent::BEARER_TOKEN : (strtolower($ENV) === 'null' ? null : $ENV);
+        return ($ENV = getenv(__FUNCTION__)) === false ? self::BEARER_TOKEN : (strtolower($ENV) === 'null' ? null : $ENV);
     }
     public static function PRIVATE_API_KEY(): string
     {
-        return getenv()[__FUNCTION__] ?? parent::PRIVATE_API_KEY;
+        return getenv()[__FUNCTION__] ?? self::PRIVATE_API_KEY;
     }
     public static function SENTRY_ENABLE(): bool
     {
-        return ($ENV = getenv(__FUNCTION__)) === false ? parent::SENTRY_ENABLE : filter_var($ENV, FILTER_VALIDATE_BOOLEAN);
+        return ($ENV = getenv(__FUNCTION__)) === false ? self::SENTRY_ENABLE : filter_var($ENV, FILTER_VALIDATE_BOOLEAN);
     }
     public static function SENTRY_DSN(): string|null
     {
-        return ($ENV = getenv(__FUNCTION__)) === false ? parent::SENTRY_DSN : (strtolower($ENV) === 'null' ? null : $ENV);
+        return ($ENV = getenv(__FUNCTION__)) === false ? self::SENTRY_DSN : (strtolower($ENV) === 'null' ? null : $ENV);
     }
     public static function getLaunchServerPublicKey(): string
     {
         return
             "-----BEGIN PUBLIC KEY-----\n" .
-            chunk_split((getenv()['LAUNCH_SERVER_ECDSA256_PUBLIC_KEY_BASE64'] ?? parent::LAUNCH_SERVER_ECDSA256_PUBLIC_KEY_BASE64), 64, "\n") .
+            chunk_split((getenv()['LAUNCH_SERVER_ECDSA256_PUBLIC_KEY_BASE64'] ?? self::LAUNCH_SERVER_ECDSA256_PUBLIC_KEY_BASE64), 64, "\n") .
             "-----END PUBLIC KEY-----";
     }
 }

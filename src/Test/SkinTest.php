@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Microwin7\PHPUtils\Test;
 
 use Microwin7\PHPUtils\Main;
+use Microwin7\PHPUtils\Utils\Path;
 use Microwin7\PHPUtils\Utils\Texture;
 use Microwin7\PHPUtils\Test\RequestParamsTest;
 use Microwin7\PHPUtils\Contracts\Texture\Models\Skin;
 use Microwin7\PHPUtils\Contracts\Texture\Enum\TextureStorageTypeEnum;
-use Microwin7\PHPUtils\Utils\Path;
 
 final class SkinTest extends Skin
 {

@@ -2,12 +2,12 @@
 
 namespace Microwin7\PHPUtils\Utils;
 
-use Microwin7\PHPUtils\Configs\MainConfig;
 use Microwin7\PHPUtils\Main;
-use Microwin7\PHPUtils\Exceptions\RconConnectException;
-use Microwin7\PHPUtils\Exceptions\RequiredArgumentMissingException;
-use Microwin7\PHPUtils\Exceptions\SolutionDisabledException;
+use Microwin7\PHPUtils\Configs\MainConfig;
 use Microwin7\PHPUtils\Exceptions\ServerNotSelected;
+use Microwin7\PHPUtils\Exceptions\RconConnectException;
+use Microwin7\PHPUtils\Exceptions\SolutionDisabledException;
+use Microwin7\PHPUtils\Exceptions\RequiredArgumentMissingException;
 
 class Rcon
 {
@@ -86,9 +86,9 @@ class Rcon
             $this->server = $server;
             try {
                 $this->sendRconCommand($command, '', false);
-            } catch (RconConnectException $e) {
+            } catch (RconConnectException) {
                 $deny_servers[] = $server;
-            } catch (SolutionDisabledException $e) {
+            } catch (SolutionDisabledException) {
             }
         }
         return $deny_servers;

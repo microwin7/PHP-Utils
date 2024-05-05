@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Microwin7\PHPUtils\Test;
 
 use Microwin7\PHPUtils\Rules\Regex;
+use Microwin7\PHPUtils\Request\RequestParamsAbstract;
 use Microwin7\PHPUtils\Contracts\Texture\Enum\MethodTypeEnum;
 use Microwin7\PHPUtils\Contracts\Texture\Enum\ResponseTypeEnum;
 use Microwin7\PHPUtils\Contracts\Texture\Enum\TextureStorageTypeEnum;
-use Microwin7\PHPUtils\Request\RequestParamsAbstract;
 
 final class RequestParamsTest extends RequestParamsAbstract
 {

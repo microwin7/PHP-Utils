@@ -2,48 +2,12 @@
 
 namespace Microwin7\PHPUtils\Configs;
 
-use Microwin7\PHPUtils\DB\DriverTypeEnum;
-use Microwin7\PHPUtils\DB\SubDBTypeEnum;
-
 class MainConfig
 {
-    /**
-     * WEB адресс приложения
-     * Вид: '<http|https>://<IP|IP:PORT|DOMAIN>/'
-     * Пример: 'http://127.0.0.1:80/'
-     * Use Main::getPublicApplicationURL()
-     */
-    protected const string APP_URL = 'http://127.0.0.1:80/';
-    // Подключение к БД сайта
-    protected const string DB_HOST = 'localhost';
-    protected const string DB_NAME = 'test';
-    protected const string DB_USER = 'test';
-    protected const string DB_PASS = 'test';
-    protected const int DB_PORT = 3306;
-    /**
-     * DriverTypeEnum::PDO [SubDBTypeEnum::MySQL, SubDBTypeEnum::PostgreSQL]
-     */
-    public const DriverTypeEnum DB_DRIVER = DriverTypeEnum::PDO;
-    /**
-     * DSN префикс Sub DB
-     * SubDBTypeEnum::MySQL
-     * SubDBTypeEnum::PostgreSQL
-     */
-    protected const SubDBTypeEnum DB_SUD_DB = SubDBTypeEnum::MySQL;
     public const array DB_PDO_OPTIONS = [
         \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
         \PDO::ATTR_PERSISTENT => true
     ];
-    // Префикс БД для SERVERS
-    protected const string DB_PREFIX_SERVERS = 'server_';
-    // Запись в файлы лога SQL запросов и их ошибок
-    protected const bool DB_DEBUG = true;
-    protected const string|null BEARER_TOKEN = null;
-    protected const string PRIVATE_API_KEY = '';
-    // https://base64.guru/converter/encode/file
-    protected const string LAUNCH_SERVER_ECDSA256_PUBLIC_KEY_BASE64 = 'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEJDi51DKs5f6ERSrDDjns00BkI963L9OS9wLA2Ak/nACZCgQma+FsTsbYtZQm4nk+rtabM8b9JgzSi3sPINb8fg==';
-    protected const bool SENTRY_ENABLE = false;
-    protected const string|null SENTRY_DSN = null;
 
     /** @var array<string, array<string, mixed>> */
     public const array SERVERS = [
@@ -109,7 +73,7 @@ class MainConfig
                  */
                 'texture_type_column' => 'type',
                 'hash_column' => 'hash',
-                /** (NULL)|SLIM(1) */
+                /** NULL(int 0)|SLIM(int 1) */
                 'texture_meta_column' => 'meta',
             ],
         ],

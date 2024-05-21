@@ -58,7 +58,7 @@ class Regex
     {
         return !empty($this->last_data) ? $this : $this->reply();
     }
-    private function preg_match(): static
+    public function preg_match(): static
     {
         foreach ($this->pattern as $pattern) {
             if (!empty($pattern) && $this->last_data !== null && preg_match($pattern, (string)$this->last_data, $v) !== 1) {

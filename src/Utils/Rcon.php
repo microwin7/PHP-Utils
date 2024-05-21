@@ -37,7 +37,7 @@ class Rcon
         if ($check_correct_server) $this->checkServer();
         $rcon = new \Thedudeguy\Rcon(
             MainConfig::SERVERS[$this->server]['host'],
-            MainConfig::SERVERS[$this->server]['port'],
+            MainConfig::SERVERS[$this->server]['rcon']['port'],
             MainConfig::SERVERS[$this->server]['rcon']['password'],
             MainConfig::SERVERS[$this->server]['rcon']['timeout'],
         );

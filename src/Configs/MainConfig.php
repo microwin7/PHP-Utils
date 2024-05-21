@@ -18,6 +18,7 @@ class MainConfig
             'rcon' => [
                 'enable' => true,
                 'password' => '',
+                'port' => 25575,
                 'timeout' => 3,
             ],
         ],
@@ -28,12 +29,21 @@ class MainConfig
             'rcon' => [
                 'enable' => false,
                 'password' => '',
+                'port' => 25576,
                 'timeout' => 3,
             ],
         ]
     ];
     /** @var array<string, array<string, string|array<string, string>>> */
     public const array MODULES = [
+        'ItemShop' => [
+            'DB_NAME' => 'ItemShop',
+            'prefix' => ''
+        ],
+        'VoteRewards' => [
+            'DB_NAME' => 'VoteRewards',
+            'prefix' => '',
+        ],
         'LuckPerms' => [
             'DB_NAME' => 'LuckPerms',
             'prefix' => 'luckperms_',

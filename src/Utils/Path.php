@@ -49,10 +49,18 @@ class Path
     {
         return self::ROOT_FOLDER() . self::SITE_TEMPLATES_FOLDER() . self::ITEM_SHOP_PATH_IN_TEMPLATES();
     }
-    public static function URL_ITEM_SHOP_IMAGES(string $image_name, string $category): string
+    public static function PATH_URL_ITEM_SHOP_IMAGES(string $server, string $mod_id, string $image_name): string
     {
-        return Main::getApplicationURL() . self::SITE_TEMPLATES_FOLDER() . self::ITEM_SHOP_PATH_IN_TEMPLATES() .
-            (empty($category) ?: ar_slash_string($category)) .
-            (empty($image_name) ?: $image_name);
+        return implode('/', array_map('rawurlencode', explode('/', ar_slash_string(self::SITE_TEMPLATES_FOLDER(), true) . self::ITEM_SHOP_PATH_IN_TEMPLATES() .
+            ($mod_id === 'VANILLA' ? '' : (empty($server) ?: ar_slash_string($server))) .
+            (empty($mod_id) ?: ar_slash_string($mod_id)) .
+            (empty($image_name) ?: $image_name))));
+    }
+    public static function URL_ITEM_SHOP_IMAGES(string $server, string $mod_id, string $image_name): string
+    {
+        return Main::getApplicationURL() . implode('/', array_map('rawurlencode', explode('/', ar_slash_string(self::SITE_TEMPLATES_FOLDER(), true) . self::ITEM_SHOP_PATH_IN_TEMPLATES() .
+        ($mod_id === 'VANILLA' ? '' : (empty($server) ?: ar_slash_string($server))) .
+        (empty($mod_id) ?: ar_slash_string($mod_id)) .
+        (empty($image_name) ?: $image_name))));
     }
 }

@@ -13,7 +13,7 @@ class FileSystem
     public function findFile(string $directory, string $fileName, ?string $extension = null): string|null
     {
         if ($this->is_dir($directory)) return $this->recursiveSearchNameFileCaseInsensitive($directory, $fileName, $extension, 0);
-        else throw FileSystemException::folderNotExist();
+        else throw FileSystemException::folderNotExist($directory);
     }
     /**
      * @return string[]
@@ -22,7 +22,7 @@ class FileSystem
     public function findFiles(string $directory, ?string $extension = null, int $level = 1): array
     {
         if ($this->is_dir($directory)) return $this->recursiveSearchFiles($directory, $extension, $level);
-        else throw FileSystemException::folderNotExist();
+        else throw FileSystemException::folderNotExist($directory);
     }
     /** @param string|string[] $folders */
     public function findFolder(string|array $folders): bool
@@ -64,7 +64,7 @@ class FileSystem
     /** @throws FileSystemException */
     public static function mkdir(string $directory): void
     {
-        mkdir($directory, 0755, true) ?: throw FileSystemException::createForbidden();
+        mkdir($directory, 0755, true) ?: throw FileSystemException::createForbidden($directory);
     }
     public function recursiveSearchNameFileCaseInsensitive(string $directory, string $fileName, ?string $extension = null, int $level = -1): string|null
     {

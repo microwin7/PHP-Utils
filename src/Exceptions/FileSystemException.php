@@ -8,13 +8,13 @@ class FileSystemException extends \Exception
     {
         parent::__construct($message, $code);
     }
-    public static function folderNotExist(): self
+    public static function folderNotExist(string $directory): self
     {
-        return new self("The folder does not exist or the script does not have read access", 404);
+        return new self(sprintf("This folder: \"%s\", does not exist or the script does not have read access", $directory), 404);
     }
-    public static function createForbidden(): self
+    public static function createForbidden(string $directory): self
     {
-        return new self("This folder cannot be created due to a permissions error", 403);
+        return new self(sprintf("This folder: \"%s\", cannot be created due to a permissions error", $directory), 403);
     }
     public function isErrorFolderNotExist(): bool
     {

@@ -6,6 +6,7 @@ use Microwin7\PHPUtils\Utils\Path;
 use Microwin7\PHPUtils\Configs\TextureConfig;
 use function Microwin7\PHPUtils\convertToBytes;
 use function Microwin7\PHPUtils\ar_slash_string;
+use function Microwin7\PHPUtils\str_ends_with_slash;
 use Microwin7\PHPUtils\Exceptions\TextureSizeException;
 use Microwin7\PHPUtils\Exceptions\TextureSizeHDException;
 use Microwin7\PHPUtils\Contracts\User\UserStorageTypeEnum;
@@ -78,10 +79,11 @@ class Texture extends TextureConfig
         return Path::ROOT_FOLDER() . self::TEXTURE_STORAGE_DIR($type);
     }
     /** FOR PHP ONLY */
-    public static function PATH(ResponseTypeEnum|TextureStorageTypeEnum $type, string $login, ?string $extension = null): string
+    public static function PATH(ResponseTypeEnum|TextureStorageTypeEnum $type, string $login, ?string $extension = null, ?int $size = null): string
     {
         $extension ??= self::EXTENSTION();
-        return self::TEXTURE_STORAGE_FULL_PATH($type) . $login . $extension;
+        $size = null === $size ? '' : str_ends_with_slash((string) $size);
+        return self::TEXTURE_STORAGE_FULL_PATH($type) . $size . $login . $extension;
     }
     /** @return array<array{w: int, h: int}> */
     public static function SIZE(ResponseTypeEnum $type = ResponseTypeEnum::SKIN): array

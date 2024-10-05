@@ -51,7 +51,7 @@ class Texture extends TextureConfig
      * ResponseTypeEnum::CAPE_RESIZE|
      * TextureStorageTypeEnum::MOJANG|TextureStorageTypeEnum::COLLECTION $type
      */
-    public static function TEXTURE_STORAGE_DIR(ResponseTypeEnum|TextureStorageTypeEnum $type): string
+    public static function TEXTURE_STORAGE_TYPE_DIR(ResponseTypeEnum|TextureStorageTypeEnum $type): string
     {
         return match ($type) {
             ResponseTypeEnum::SKIN, ResponseTypeEnum::CAPE, ResponseTypeEnum::AVATAR,
@@ -59,7 +59,7 @@ class Texture extends TextureConfig
             ResponseTypeEnum::BACK, ResponseTypeEnum::BACK_CAPE, ResponseTypeEnum::BACK_WITH_CAPE,
             ResponseTypeEnum::CAPE_RESIZE => self::STORAGE_DIR() . ar_slash_string(getenv()['TEXTURE_' . $type->name . '_PATH'] ?? (strtolower($type->name) . 's')),
             TextureStorageTypeEnum::MOJANG, TextureStorageTypeEnum::COLLECTION => self::STORAGE_DIR() . ar_slash_string(getenv()['TEXTURE_' . $type->name . '_PATH'] ?? $type->name),
-            default => throw new \InvalidArgumentException(sprintf('Un-supported TEXTURE_STORAGE_DIR: %s', $type->name))
+            default => throw new \InvalidArgumentException(sprintf('Un-supported TEXTURE_STORAGE_TYPE_DIR: %s', $type->name))
         };
     }
     public static function EXTENSTION(): string
@@ -74,16 +74,16 @@ class Texture extends TextureConfig
      * ResponseTypeEnum::CAPE_RESIZE|
      * TextureStorageTypeEnum::MOJANG|TextureStorageTypeEnum::COLLECTION $type
      */
-    public static function TEXTURE_STORAGE_FULL_PATH(ResponseTypeEnum|TextureStorageTypeEnum $type): string
+    public static function TEXTURE_STORAGE_FULL_PATH(ResponseTypeEnum|TextureStorageTypeEnum $type, ?int $size = null): string
     {
-        return Path::ROOT_FOLDER() . self::TEXTURE_STORAGE_DIR($type);
+        $size = null === $size ? '' : str_ends_with_slash((string) $size);
+        return Path::ROOT_FOLDER() . self::TEXTURE_STORAGE_TYPE_DIR($type) . $size;
     }
     /** FOR PHP ONLY */
     public static function PATH(ResponseTypeEnum|TextureStorageTypeEnum $type, string $login, ?string $extension = null, ?int $size = null): string
     {
         $extension ??= self::EXTENSTION();
-        $size = null === $size ? '' : str_ends_with_slash((string) $size);
-        return self::TEXTURE_STORAGE_FULL_PATH($type) . $size . $login . $extension;
+        return self::TEXTURE_STORAGE_FULL_PATH($type, $size) . $login . $extension;
     }
     /** @return array<array{w: int, h: int}> */
     public static function SIZE(ResponseTypeEnum $type = ResponseTypeEnum::SKIN): array

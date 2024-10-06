@@ -40,7 +40,7 @@ class DriverPDO implements \Iterator
             $this->preConnectionExec();
         } catch (\PDOException $e) {
             $this->debug->debug_error("[{$this->database}] Connection ERROR: [CODE: " . ($e->errorInfo[1] ?? 'NULL')  . " | MESSAGE: " . ($e->errorInfo[2] ?? 'NULL') . " ]");
-            throw new DBException('PDO Connection ERROR');
+            throw new DBException("PDO Connection ERROR: [CODE: " . ($e->errorInfo[1] ?? 'NULL')  . "]");
         }
     }
     private function generateDSN(): void

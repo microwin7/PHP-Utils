@@ -2,6 +2,7 @@
 
 namespace Microwin7\PHPUtils\Request;
 
+use Microwin7\PHPUtils\Rules\Regex;
 use Microwin7\PHPUtils\Attributes\AsArguments;
 use function Microwin7\PHPUtils\implodeRecursive;
 use Microwin7\PHPUtils\Attributes\RegexArguments;
@@ -13,7 +14,7 @@ use Microwin7\PHPUtils\Exceptions\RequiredArgumentMissingException;
 
 class RequiredArguments
 {
-    /** @var array<string, string|EnumRequestInterface|EnumInterface|\BackedEnum|non-empty-array<int|string, array<int|string, mixed>|string>|null> $arguments */
+    /** @var array<string, string|int|bool|EnumRequestInterface|EnumInterface|\BackedEnum|non-empty-array<int|string, array<int|string, mixed>|string>|null> $arguments */
     private array $arguments = [];
     /** @var array<string|string[]> $requiredArguments */
     private array $requiredArguments;
@@ -36,9 +37,9 @@ class RequiredArguments
         $this->execute();
     }
     /**
-     * @return string|EnumRequestInterface|\BackedEnum|EnumInterface|non-empty-array<int|string, array<int|string, mixed>|string>|null
+     * @return string|int|bool|EnumRequestInterface|\BackedEnum|EnumInterface|non-empty-array<int|string, array<int|string, mixed>|string>|null
      */
-    public function __get(string $name): string|array|null|object
+    public function __get(string $name): string|int|bool|array|null|object
     {
         return $this->arguments[$name];
     }
@@ -136,9 +137,17 @@ class RequiredArguments
     private function setVariable(string $argument, bool $optional = false): void
     {
         if (strrpos($argument, '\\') === false) {
-            $whereValue = $this->where[$argument] ?? ($optional ? null : throw new RequiredArgumentMissingException($argument));
-            $this->with($argument, $whereValue);
-            if (isset($this->regexArguments[$argument])) $this->validateVariable($this->regexArguments[$argument]);
+            $VALUE = $this->where[$argument] ?? ($optional ? null : throw new RequiredArgumentMissingException($argument));
+            if (isset($this->regexArguments[$argument])) {
+                $this->validateVariable($this->regexArguments[$argument]);
+                /** @psalm-suppress RiskyCast */
+                $VALUE = match ($this->regexArguments[$argument]->regexp) {
+                    Regex::BOOLEAN_REGXP => (bool) $VALUE,
+                    Regex::NUMERIC_REGXP => (int) $VALUE,
+                    default => $VALUE
+                };
+            }
+            $this->with($argument, $VALUE);
         } else if (enum_exists($argument)) {
             $argumentClazz = new \ReflectionClass($argument);
             if (
@@ -149,11 +158,11 @@ class RequiredArguments
                 /** @var interface-string<\BackedEnum & EnumInterface & EnumRequestInterface> $enumClass */
                 $enumClass = $argument;
                 try {
-                    $whereValue = $this->where[$enumClass::getNameRequestVariable()] ?? throw new RequiredArgumentMissingException('Missing Request variable: ' . $enumClass::getNameRequestVariable());
-                    if (is_numeric($whereValue))
-                        $this->with($enumClass::getNameVariable(), $enumClass::from((int)$whereValue));
-                    elseif (is_string($whereValue))
-                        $this->with($enumClass::getNameVariable(), $enumClass::fromString($whereValue));
+                    $VALUE = $this->where[$enumClass::getNameRequestVariable()] ?? throw new RequiredArgumentMissingException('Missing Request variable: ' . $enumClass::getNameRequestVariable());
+                    if (is_numeric($VALUE))
+                        $this->with($enumClass::getNameVariable(), $enumClass::from((int)$VALUE));
+                    elseif (is_string($VALUE))
+                        $this->with($enumClass::getNameVariable(), $enumClass::fromString($VALUE));
                 } catch (\InvalidArgumentException $exception) {
                     if (!$optional) throw new \InvalidArgumentException((string)$exception);
                     $this->with($enumClass::getNameVariable(), $enumClass::getDefault());
@@ -164,7 +173,7 @@ class RequiredArguments
     protected function validateVariable(RegexArguments $regexArgument): void
     {
         null === $this->{$regexArgument->argument}
-            ?: filter_var($this->{$regexArgument->argument}, FILTER_VALIDATE_REGEXP, ['options' => ['regexp' => $regexArgument->regexp]])
+            ?: filter_var($this->{$regexArgument->argument}, FILTER_VALIDATE_REGEXP, ['options' => ['regexp' => $regexArgument->regexp]]) !== false
             ?: (
                 !is_null($regexArgument->messageCallback)
                 ? throw new RegexArgumentsFailedException($regexArgument->messageCallback)
@@ -176,8 +185,8 @@ class RequiredArguments
                 ))
             );
     }
-    /** @param string|EnumRequestInterface|EnumInterface|\BackedEnum|non-empty-array<int|string, array<int|string, mixed>|string>|null $value */
-    private function with(string $property, string|object|array|null $value): void
+    /** @param string|int|bool|EnumRequestInterface|EnumInterface|\BackedEnum|non-empty-array<int|string, array<int|string, mixed>|string>|null $value */
+    private function with(string $property, string|int|bool|object|array|null $value): void
     {
         if (strrpos($property, '\\') === false) {
             $this->arguments[$property] = $value;

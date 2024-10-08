@@ -11,6 +11,7 @@ class Regex
     public const string ID_REGXP = '/^[a-zA-Z0-9\-\_\:\.]+$/';
     public const string DISPLAYNAME_REGXP = '/^[a-zA-Zа-яА-ЯЁё0-9\-\_\ \(\)\[\]\.\,\"\«\»\/]+$/';
     public const string NUMERIC_REGXP = '/^[0-9]+$/';
+    public const string BOOLEAN_REGXP = '/^(0|1|[Tt][Rr][Uu][Ee]|[Ff][Aa][Ll][Ss][Ee])$/';
     public const string CATEGORY_REGXP = '/^[A-Z0-9\_]+$/';
     public const string ITEM_LINK_REGXP = '/^[a-zA-Z0-9\_\-\.]+$/';
     public const string SERVER_REGXP = '/^[a-zA-Z\_]+$/';

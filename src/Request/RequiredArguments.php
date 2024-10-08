@@ -138,7 +138,7 @@ class RequiredArguments
     {
         if (strrpos($argument, '\\') === false) {
             $VALUE = $this->where[$argument] ?? ($optional ? null : throw new RequiredArgumentMissingException($argument));
-            if (isset($this->regexArguments[$argument])) {
+            if (isset($this->regexArguments[$argument]) && isset($this->where[$argument])) {
                 $this->validateVariable($this->regexArguments[$argument]);
                 /** @psalm-suppress RiskyCast */
                 $VALUE = match ($this->regexArguments[$argument]->regexp) {

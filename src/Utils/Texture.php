@@ -3,6 +3,7 @@
 namespace Microwin7\PHPUtils\Utils;
 
 use Microwin7\PHPUtils\Utils\Path;
+use Microwin7\PHPUtils\Rules\Regex;
 use Microwin7\PHPUtils\Configs\TextureConfig;
 use function Microwin7\PHPUtils\convertToBytes;
 use function Microwin7\PHPUtils\ar_slash_string;
@@ -25,17 +26,29 @@ class Texture extends TextureConfig
     private const bool LEGACY_DIGEST = false;
     /** Максимальный размер загружаемого файла byte => Kbyte, Kbyte => MB * 2 */
     private const int MAX_SIZE_BYTES = 2 * 1024 * 1024;
-    /** https://base64.guru/converter/encode/image */
-    private const string SKIN_DEFAULT = "iVBORw0KGgoAAAANSUhEUgAAAEAAAAAgCAMAAACVQ462AAAAWlBMVEVHcEwsHg51Ri9qQC+HVTgjIyNO
-    LyK7inGrfWaWb1udZkj///9SPYmAUjaWX0FWScwoKCgAzMwAXl4AqKgAaGgwKHImIVtGOqU6MYkAf38AmpoAr68/Pz9ra2t3xPtNAA
-    AAAXRSTlMAQObYZgAAAZJJREFUeNrUzLUBwDAUA9EPMsmw/7jhNljl9Xdy0J3t5CndmcOBT4Mw8/8P4pfB6sNg9yA892wQvwzSIr8f
-    5JRzSeS7AaiptpxazUq8GPQB5uSe2DH644GTsDFsNrqB9CcDgOCAmffegWWwAExnBrljqowsFBuGYShY5oakgOXs/39zF6voDG9r+w
-    LvTCVUcL+uV4m6uXG/L3Ut691697tgnZgJavinQHOB7DD8awmaLWEmaNuu7YGf6XcIITRm19P1ahbARCRGEc8x/UZ4CroXAQTVIGL0
-    YySrREBADFGicS8XtG8CTS+IGU2F6EgSE34VNKoNz8348mzoXGDxpxkQBpg2bWobjgZSm+uiKDYH2BAO8C4YBmbgAjpq5jUl4yGJC4
-    6HQ7HJBfkeTAImIEmgmtpINi44JsHx+CKA/BTuArISXeBTR4AI5gK4C2JqRfPs0HNBkQnG8S4Yxw8IGoIZfXEBOW1D4YJDAdNSXgRe
-    vP+ylK6fGBCwsWywmA19EtBkJr8K2t4N5pnAVwH0jptsBp+2gUFj4tL5ywAAAABJRU5ErkJggg==";
+    private const string SKIN_DEFAULT = "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";
     private const string CAPE_DEFAULT = "iVBORw0KGgoAAAANSUhEUgAAAEAAAAAgAQMAAACYU+zHAAAAA1BMVEVHcEyC+tLSAAAAAXRSTlMAQObY
     ZgAAAAxJREFUeAFjGAV4AQABIAABL3HDQQAAAABJRU5ErkJggg==";
+    private const string SKIN_DEFAULT_SHA256 = '1e5d79cecb89b1b839b8229cc3b8087bfccaca9d92f195b10fc6739ea92cd957';
+    private const string CAPE_DEFAULT_SHA256 = 'f2072fdfff5302b7c13672e54fdc8895dc75b3f675be3a43245de6894f971e38';
 
     /** BASE DIR */
     public static function STORAGE_DIR(): string
@@ -135,11 +148,23 @@ class Texture extends TextureConfig
     }
     public static function SKIN_DEFAULT(): string
     {
-        return base64_decode(getenv()[__FUNCTION__] ?? self::SKIN_DEFAULT) ?: throw new \InvalidArgumentException('Error base64_decode: ' . __FUNCTION__);
+        return base64_decode(self::SKIN_DEFAULT);
     }
     public static function CAPE_DEFAULT(): string
     {
-        return base64_decode(getenv()[__FUNCTION__] ?? self::CAPE_DEFAULT) ?: throw new \InvalidArgumentException('Error base64_decode: ' . __FUNCTION__);
+        return base64_decode(self::CAPE_DEFAULT);
+    }
+    public static function SKIN_DEFAULT_SHA256(): string
+    {
+        $SKIN_DEFAULT_SHA256 = getenv()[__FUNCTION__] ?? null;
+        $SKIN_DEFAULT_SHA256 !== null ? Regex::valid_with_pattern($SKIN_DEFAULT_SHA256, Regex::SHA256) : $SKIN_DEFAULT_SHA256 = self::SKIN_DEFAULT_SHA256;
+        return $SKIN_DEFAULT_SHA256;
+    }
+    public static function CAPE_DEFAULT_SHA256(): string
+    {
+        $CAPE_DEFAULT_SHA256 = getenv()[__FUNCTION__] ?? null;
+        $CAPE_DEFAULT_SHA256 !== null ? Regex::valid_with_pattern($CAPE_DEFAULT_SHA256, Regex::SHA256) : $CAPE_DEFAULT_SHA256 = self::CAPE_DEFAULT_SHA256;
+        return $CAPE_DEFAULT_SHA256;
     }
     public static function digest(string $data, UserStorageTypeEnum $hashType = UserStorageTypeEnum::DB_SHA256): string
     {

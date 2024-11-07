@@ -23,7 +23,8 @@ enum ResponseTypeEnum: int implements JsonSerializable, EnumInterface, EnumReque
     case BACK               = 7;
     case BACK_CAPE          = 8;
     case BACK_WITH_CAPE     = 9;
-    case CAPE_RESIZE        = 10;
+    case SKIN_RESIZE        = 10; // Native
+    case CAPE_RESIZE        = 11;
 
     public static function getDefault(): static
     {

@@ -66,6 +66,23 @@ class FileSystem
     {
         mkdir($directory, 0755, true) ?: throw FileSystemException::createForbidden($directory);
     }
+    public static function save_lock(string $data, string $path): void
+    {
+        try {
+            $fp = fopen($path, 'w');
+            if ($fp === false) throw new FileSystemException("Не удалось открыть файл для записи");
+            if (flock($fp, LOCK_EX) === false) throw new FileSystemException("Не удалось заблокировать файл для записи");
+            if (fwrite($fp, $data) === false) throw new FileSystemException("Ошибка при записи данных в файл");
+            fflush($fp);
+            if (flock($fp, LOCK_UN) === false) throw new FileSystemException("Не удалось заблокировать файл для записи");
+            fclose($fp);
+        } catch (FileSystemException $e) {
+            if (isset($fp) && is_resource($fp)) {
+                fclose($fp);
+            }
+            throw $e;
+        }
+    }
     public function recursiveSearchNameFileCaseInsensitive(string $directory, string $fileName, ?string $extension = null, int $level = -1): string|null
     {
         $extension ??= '';

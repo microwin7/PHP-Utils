@@ -138,6 +138,7 @@ class RequiredArguments
     {
         if (strrpos($argument, '\\') === false) {
             $VALUE = $this->where[$argument] ?? ($optional ? null : throw new RequiredArgumentMissingException($argument));
+            $this->with($argument, $VALUE);
             if (isset($this->regexArguments[$argument]) && isset($this->where[$argument])) {
                 $this->validateVariable($this->regexArguments[$argument]);
                 /** @psalm-suppress RiskyCast */
@@ -147,7 +148,6 @@ class RequiredArguments
                     default => $VALUE
                 };
             }
-            $this->with($argument, $VALUE);
         } else if (enum_exists($argument)) {
             $argumentClazz = new \ReflectionClass($argument);
             if (

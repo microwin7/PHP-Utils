@@ -106,7 +106,7 @@ class RequiredArguments
                         try {
                             $this->setVariable($oneFromAllArgumets);
                             $count++;
-                        } catch (RequiredArgumentMissingException $ignored) {
+                        } catch (RequiredArgumentMissingException) {
                             $this->with($oneFromAllArgumets, null);
                         }
                     }
@@ -177,12 +177,7 @@ class RequiredArguments
             ?: (
                 !is_null($regexArgument->messageCallback)
                 ? throw new RegexArgumentsFailedException($regexArgument->messageCallback)
-                : throw new \ValueError(sprintf(
-                    'Field "%s" should be valid with pattern: [%s], "%s" given',
-                    $regexArgument->argument,
-                    $regexArgument->regexp,
-                    (string)$this->{$regexArgument->argument}
-                ))
+                : throw RegexArgumentsFailedException::pattern($regexArgument->argument, $regexArgument->regexp, $this->{$regexArgument->argument})
             );
     }
     /** @param string|int|bool|EnumRequestInterface|EnumInterface|\BackedEnum|non-empty-array<int|string, array<int|string, mixed>|string>|null $value */

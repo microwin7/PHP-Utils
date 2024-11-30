@@ -6,6 +6,7 @@ namespace Microwin7\PHPUtils\Request;
 
 use Microwin7\PHPUtils\Contracts\Enum\EnumInterface;
 use Microwin7\PHPUtils\Contracts\Enum\EnumRequestInterface;
+use Microwin7\PHPUtils\Exceptions\RegexArgumentsFailedException;
 use Microwin7\PHPUtils\Exceptions\RequiredArgumentMissingException;
 
 #[\AllowDynamicProperties]
@@ -58,7 +59,7 @@ abstract class RequestParamsAbstract implements RequestParamsInterface
     {
         null === $this->arguments[$key]
             ?: filter_var($this->$key, FILTER_VALIDATE_REGEXP, ['options' => ['regexp' => $regexp]])
-            ?: throw new \ValueError(sprintf('Field "%s" should be valid with pattern: [%s], "%s" given', $key, $regexp, (string)$this->$key));
+            ?: throw RegexArgumentsFailedException::pattern($key, $regexp, (string)$this->$key);
         return $this;
     }
     /**
@@ -100,7 +101,7 @@ abstract class RequestParamsAbstract implements RequestParamsInterface
         }
     }
     /**
-     * @throws \ValueError
+     * @throws RegexArgumentsFailedException
      */
     protected function addVariable(string $key, string $regexp, bool $maybeNull = false): static
     {

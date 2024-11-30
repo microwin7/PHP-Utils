@@ -8,4 +8,13 @@ class RegexArgumentsFailedException extends \Exception
     {
         parent::__construct($message);
     }
+    public static function pattern(string $argument, string $regexp, mixed $argument_given): self
+    {
+        return new self(sprintf(
+            'Field "%s" should be valid with pattern: [%s], "%s" given',
+            $argument,
+            $regexp,
+            (string)$argument_given
+        ));
+    }
 }

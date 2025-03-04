@@ -8,15 +8,26 @@ use Microwin7\PHPUtils\Exceptions\ServerNotFoundException;
 
 class SingletonConnector
 {
-    /** @var array<string, DriverPDO> */
+    /** @var array<string, DriverPDOInterface> */
     private static array $database = [];
 
-    public function __get(string $database): DriverPDO
+    /** @var class-string<DriverPDOInterface> */
+    protected static string $driver = DriverPDO::class;
+
+    public static function setCustomDriver(string $classDriver): void
+    {
+        if (is_subclass_of($classDriver, DriverPDOInterface::class)) {
+            self::$driver = $classDriver;
+        } else {
+            throw new \RuntimeException("This $classDriver is not an implementation of " . DriverPDOInterface::class);
+        }
+    }
+    public function __get(string $database): DriverPDOInterface
     {
         if (array_key_exists($database, self::$database)) return self::$database[$database];
         return $this->getConnect($database);
     }
-    public static function get(string $database = ''): DriverPDO
+    public static function get(string $database = ''): DriverPDOInterface
     {
         if (array_key_exists($database, self::$database)) return self::$database[$database];
         return self::getConnect($database);
@@ -24,9 +35,7 @@ class SingletonConnector
     /**
      * Singletons should not be cloneable.
      */
-    protected function __clone()
-    {
-    }
+    protected function __clone() {}
     /**
      * Singletons should not be restorable from strings.
      * 
@@ -36,7 +45,7 @@ class SingletonConnector
     {
         throw new \Exception("Cannot unserialize a singleton.");
     }
-    private static function getConnect(string $database): DriverPDO
+    private static function getConnect(string $database): DriverPDOInterface
     {
         $module = [];
         if (empty($database) || $database == Main::DB_NAME()) $database = Main::DB_NAME();
@@ -44,7 +53,7 @@ class SingletonConnector
             try {
                 /** @psalm-suppress RedundantFunctionCall */
                 $database = strtolower(Main::DB_PREFIX_SERVERS() . Main::getServerWithoutDefault($database));
-            } catch (ServerNotFoundException $e) {
+            } catch (ServerNotFoundException) {
                 $modules_keys_lower_case = array_change_key_case(MainConfig::MODULES);
                 $key_exists = array_key_exists(strtolower($database), $modules_keys_lower_case);
                 if ($key_exists === true) {
@@ -57,14 +66,6 @@ class SingletonConnector
             }
         }
         if (array_key_exists($database, self::$database)) return self::$database[$database];
-        return new DriverPDO($database, $module['prefix'] ?? '');
-        // /**
-        //  * @var string $module['prefix']
-        //  * @psalm-suppress TypeDoesNotContainType
-        //  */
-        // return self::$database[$database] = match (MainConfig::DB_DRIVER) {
-        //     DriverTypeEnum::MySQLi => new DriverMySQLi($database, $module['prefix'] ?? ''),
-        //     DriverTypeEnum::PDO => new DriverPDO($database, $module['prefix'] ?? ''),
-        // };
+        return new self::$driver($database, $module['prefix'] ?? '');
     }
 }

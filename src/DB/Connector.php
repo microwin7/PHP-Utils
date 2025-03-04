@@ -8,16 +8,26 @@ use Microwin7\PHPUtils\Exceptions\ServerNotFoundException;
 
 class Connector
 {
-    /** @var array<string, DriverPDO> */
+    /** @var array<string, DriverPDOInterface> */
     protected array $database = [];
 
-    public function __get(string $database): DriverPDO
+    /** @var class-string<DriverPDOInterface> */
+    protected static string $driver = DriverPDO::class;
+
+    public static function setCustomDriver(string $classDriver): void
+    {
+        if (is_subclass_of($classDriver, DriverPDOInterface::class)) {
+            self::$driver = $classDriver;
+        } else {
+            throw new \RuntimeException("This $classDriver is not an implementation of " . DriverPDOInterface::class);
+        }
+    }
+    public function __get(string $database): DriverPDOInterface
     {
         if (array_key_exists($database, $this->database)) return $this->database[$database];
         return $this->getConnect($database);
     }
-
-    private function getConnect(string $database): DriverPDO
+    private function getConnect(string $database): DriverPDOInterface
     {
         $module = [];
         if (empty($database) || $database == Main::DB_NAME()) $database = Main::DB_NAME();
@@ -25,7 +35,7 @@ class Connector
             try {
                 /** @psalm-suppress RedundantFunctionCall */
                 $database = strtolower(Main::DB_PREFIX_SERVERS() . Main::getServerWithoutDefault($database));
-            } catch (ServerNotFoundException $e) {
+            } catch (ServerNotFoundException) {
                 $modules_keys_lower_case = array_change_key_case(MainConfig::MODULES);
                 $key_exists = array_key_exists(strtolower($database), $modules_keys_lower_case);
                 if ($key_exists === true) {
@@ -38,14 +48,6 @@ class Connector
             }
         }
         if (array_key_exists($database, $this->database)) return $this->database[$database];
-        return new DriverPDO($database, $module['prefix'] ?? '');
-        // /**
-        //  * @var string $module['prefix']
-        //  * @psalm-suppress TypeDoesNotContainType
-        //  */
-        // return $this->database[$database] = match (MainConfig::DB_DRIVER) {
-        //     DriverTypeEnum::MySQLi => new DriverMySQLi($database, $module['prefix'] ?? ''),
-        //     DriverTypeEnum::PDO => new DriverPDO($database, $module['prefix'] ?? ''),
-        // };
+        return new self::$driver($database, $module['prefix'] ?? '');
     }
 }

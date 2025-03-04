@@ -4,7 +4,6 @@ namespace Microwin7\PHPUtils;
 
 use Microwin7\PHPUtils\Utils\Path;
 use Microwin7\PHPUtils\DB\SubDBTypeEnum;
-use Microwin7\PHPUtils\DB\DriverTypeEnum;
 use Microwin7\PHPUtils\Configs\MainConfig;
 use function Microwin7\PHPUtils\str_ends_with_slash;
 use Microwin7\PHPUtils\Exceptions\ServerNotFoundException;
@@ -25,12 +24,6 @@ class Main extends MainConfig
     private const string DB_USER = 'test';
     private const string DB_PASS = 'test';
     private const int DB_PORT = 3306;
-    /**
-     * НЕ МЕНЯТЬ, ЕДИНСТВЕННЫЙ ПОДДЕРЖИВАЕМЫЙ ДРАЙВЕР
-     * @deprecated v1.7.0.3
-     * DriverTypeEnum::PDO [SubDBTypeEnum::MySQL, SubDBTypeEnum::PostgreSQL]
-     */
-    public const DriverTypeEnum DB_DRIVER = DriverTypeEnum::PDO;
     /**
      * DSN префикс Sub DB
      * SubDBTypeEnum::MySQL

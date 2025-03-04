@@ -11,7 +11,7 @@
         "ext-mysqli": "*",
         "ext-json": "*",
         "microwin7/rcon": "^1.1",
-        "sentry/sentry": "^4.7"
+        "sentry/sentry": "^4.10"
     },
     "autoload": {
         "psr-4": {
@@ -34,6 +34,6 @@
     },
     "minimum-stability": "stable",
     "require-dev": {
-        "vimeo/psalm": "5.x-dev"
+        "vimeo/psalm": "6.8.8"
     }
 }

@@ -11,9 +11,9 @@ use Microwin7\PHPUtils\Exceptions\DB\DuplicateEntry;
 /**
  * @template-implements \Iterator<int, array>
  */
-class DriverPDO implements \Iterator
+class DriverPDO implements \Iterator, DriverPDOInterface
 {
-    private \PDO $DBH;
+    protected \PDO $DBH;
     private string $DSN;
     /** @psalm-suppress PropertyNotSetInConstructor */
     private \PDOStatement $STH;
@@ -62,6 +62,26 @@ class DriverPDO implements \Iterator
     }
     public function __destruct()
     {
+    }
+    public function getDBH(): \PDO
+    {
+        return $this->DBH;
+    }
+    public function beginTransaction(): bool
+    {
+        return $this->DBH->beginTransaction();
+    }
+    public function inTransaction(): bool
+    {
+        return $this->DBH->inTransaction();
+    }
+    public function commit(): bool
+    {
+        return $this->DBH->commit();
+    }
+    public function rollback(): bool
+    {
+        return $this->DBH->rollBack();
     }
     private function table(string $table): string
     {
@@ -144,24 +164,13 @@ class DriverPDO implements \Iterator
         }
         try {
             $this->insert_id = $this->DBH->lastInsertId();
-        } catch (\PDOException $ignored) {
+        } catch (\PDOException) {
             // Ошибка только с postgresql, предположительно, необходимо вызывать NEXTVAL('?') до LASTVAL()
             //Fatal error: Uncaught PDOException: SQLSTATE[55000]: Object not in prerequisite state: 7 ERROR:
             //lastval is not yet defined in this session in Utils/DBDriverPDO.php:136
         }
         return $this;
     }
-
-    // public function execute(){
-    //     try {
-    //         $this->STH->execute();
-    //     } catch (\PDOException $e) {
-    //         $this->debug->debug_error($param_type ?
-    //             "[{$this->database}] Statement execution error: {$e}\n$sql with params:\n$param_type -> " . implode(', ', $params) :
-    //             "[{$this->database}] Statement execution error: {$e}\n$sql");
-    //         throw new DBException('SQL query error');
-    //     }
-    // }
 
     public function getStatementHandler(): \PDOStatement
     {
@@ -238,19 +247,9 @@ class DriverPDO implements \Iterator
      * @param array $constructor_args Аргументы для конструктора передаваемого класса, для заполнения
      * @return T|null Возвращает объект с параметрами класса как в БД и заполненными добавочными данными из аргументов констркутора класса
      */
-    public function obj($class = \stdClass::class, array $constructor_args = [])
+    public function obj($class = \stdClass::class, array $constructor_args = []): object|null
     {
         return $this->STH->fetchObject($class, $constructor_args) ?: null;
-    }
-    /**
-     * Индексированный массив объектов результата
-     * Use objects()
-     * @deprecated
-     * @return array
-     */
-    public function object(): array
-    {
-        return $this->objects();
     }
     // Индексированный массив объектов результата
     /**

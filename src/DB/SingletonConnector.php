@@ -66,6 +66,6 @@ class SingletonConnector
             }
         }
         if (array_key_exists($database, self::$database)) return self::$database[$database];
-        return new self::$driver($database, $module['prefix'] ?? '');
+        return self::$database[$database] = new self::$driver($database, $module['prefix'] ?? '');
     }
 }

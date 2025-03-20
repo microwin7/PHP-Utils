@@ -29,25 +29,20 @@ class Connector
     }
     private function getConnect(string $database): DriverPDOInterface
     {
-        $module = [];
-        if (empty($database) || $database == Main::DB_NAME()) $database = Main::DB_NAME();
+        if (empty($database) || $database == Main::DB_NAME()) $DB_NAME = Main::DB_NAME();
         else {
             try {
                 /** @psalm-suppress RedundantFunctionCall */
-                $database = strtolower(Main::DB_PREFIX_SERVERS() . Main::getServerWithoutDefault($database));
+                $DB_NAME = strtolower(Main::DB_PREFIX_SERVERS() . Main::getServerWithoutDefault($database));
             } catch (ServerNotFoundException) {
-                $modules_keys_lower_case = array_change_key_case(MainConfig::MODULES);
-                $key_exists = array_key_exists(strtolower($database), $modules_keys_lower_case);
-                if ($key_exists === true) {
-                    $module = $modules_keys_lower_case[strtolower($database)];
-                    $database = $module['DB_NAME'];
-                } else {
-                    throw new ServerNotFoundException($database);
-                    //$database = MainConfig::DB_NAME;
+                $DB_NAME = Main::DB_NAME_MODULE($database);
+                try {
+                    $DB_TABLE_PREFIX = Main::DB_TABLE_PREFIX_MODULE($database);
+                } catch (\RuntimeException) {
                 }
             }
         }
-        if (array_key_exists($database, $this->database)) return $this->database[$database];
-        return new self::$driver($database, $module['prefix'] ?? '');
+        if (array_key_exists($DB_NAME, $this->database)) return $this->database[$DB_NAME];
+        return $this->database[$DB_NAME] = new self::$driver($DB_NAME, $DB_TABLE_PREFIX ?? '');
     }
 }

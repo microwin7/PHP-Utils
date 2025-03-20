@@ -36,25 +36,8 @@ class MainConfig
     ];
     /** @var array<string, array<string, string|array<string, string>>> */
     public const array MODULES = [
-        'ItemShop' => [
-            'DB_NAME' => 'ItemShop',
-            'prefix' => ''
-        ],
-        'VoteRewards' => [
-            'DB_NAME' => 'VoteRewards',
-            'prefix' => '',
-        ],
-        'LuckPerms' => [
-            'DB_NAME' => 'LuckPerms',
-            'prefix' => 'luckperms_',
-        ],
-        'LiteBans' => [
-            'DB_NAME' => 'LiteBans',
-            'prefix' => 'litebans_',
-        ],
         'TextureProvider' => [
             /** Driver Connect Database */
-            'DB_NAME' => 'site',
             'table_user' => [
                 'TABLE_NAME' => 'users',
                 /**

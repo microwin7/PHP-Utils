@@ -5,6 +5,7 @@ namespace Microwin7\PHPUtils;
 use Microwin7\PHPUtils\Utils\Path;
 use Microwin7\PHPUtils\DB\SubDBTypeEnum;
 use Microwin7\PHPUtils\Configs\MainConfig;
+use function Microwin7\PHPUtils\serializeEnvName;
 use function Microwin7\PHPUtils\str_ends_with_slash;
 use Microwin7\PHPUtils\Exceptions\ServerNotFoundException;
 use Microwin7\PHPUtils\Exceptions\AliasServerNotFoundException;
@@ -157,6 +158,16 @@ class Main extends MainConfig
     public static function DB_NAME(): string
     {
         return getenv()[__FUNCTION__] ?? self::DB_NAME;
+    }
+    public static function DB_NAME_MODULE(string $name_module): string
+    {
+        $ENV = serializeEnvName(__FUNCTION__, $name_module);
+        return getenv()[$ENV] ?? throw new \RuntimeException("ENV: $ENV not found");
+    }
+    public static function DB_TABLE_PREFIX_MODULE(string $name_module): string
+    {
+        $ENV = serializeEnvName(__FUNCTION__, $name_module);
+        return getenv()[$ENV] ?? throw new \RuntimeException("ENV: $ENV not found");
     }
     public static function DB_USER(): string
     {

@@ -4,7 +4,6 @@ namespace Microwin7\PHPUtils\Utils;
 
 use Microwin7\PHPUtils\Utils\Path;
 use Microwin7\PHPUtils\Rules\Regex;
-use Microwin7\PHPUtils\Configs\TextureConfig;
 use function Microwin7\PHPUtils\convertToBytes;
 use function Microwin7\PHPUtils\ar_slash_string;
 use function Microwin7\PHPUtils\str_ends_with_slash;
@@ -14,7 +13,7 @@ use Microwin7\PHPUtils\Contracts\User\UserStorageTypeEnum;
 use Microwin7\PHPUtils\Contracts\Texture\Enum\ResponseTypeEnum;
 use Microwin7\PHPUtils\Contracts\Texture\Enum\TextureStorageTypeEnum;
 
-class Texture extends TextureConfig
+class Texture
 {
     /**
      * Для вызова, сохранения, проверок
@@ -49,6 +48,33 @@ class Texture extends TextureConfig
     ZgAAAAxJREFUeAFjGAV4AQABIAABL3HDQQAAAABJRU5ErkJggg==";
     private const string SKIN_DEFAULT_SHA256 = '98805f6ab41575b7ff4af11b70c074773c5bcc210f2429f6b5513150d746e4cd';
     private const string CAPE_DEFAULT_SHA256 = 'f2072fdfff5302b7c13672e54fdc8895dc75b3f675be3a43245de6894f971e38';
+    /** list<array{0: int, 1: int}> */
+    private const array SKIN_SIZE = [
+        [64, 64],
+        [64, 32]
+    ];
+    /** list<array{0: int, 1: int}> */
+    private const array CAPE_SIZE = [
+        [64, 32]
+    ];
+    /** list<array{0: int, 1: int}> */
+    private const array SKIN_SIZE_HD = [
+        [128, 64],
+        [128, 128],
+        [256, 128],
+        [256, 256],
+        [512, 256],
+        [512, 512],
+        [1024, 512],
+        [1024, 1024]
+    ];
+    /** list<array{0: int, 1: int}> */
+    private const array CAPE_SIZE_HD = [
+        [128, 64],
+        [256, 128],
+        [512, 256],
+        [1024, 512]
+    ];
 
     /** BASE DIR */
     public static function STORAGE_DIR(): string
@@ -98,30 +124,52 @@ class Texture extends TextureConfig
         $extension ??= self::EXTENSTION();
         return self::TEXTURE_STORAGE_FULL_PATH($type, $size) . $login . $extension;
     }
-    /** @return array<array{w: int, h: int}> */
+    /** @return array<array-key, object{width: int, height: int}> */
     public static function SIZE(ResponseTypeEnum $type = ResponseTypeEnum::SKIN): array
     {
         return match ($type) {
-            ResponseTypeEnum::SKIN => parent::SKIN_SIZE,
-            ResponseTypeEnum::CAPE => parent::CAPE_SIZE,
+            ResponseTypeEnum::SKIN => self::parseSizeEnvArray('SKIN_SIZE'),
+            ResponseTypeEnum::CAPE => self::parseSizeEnvArray('CAPE_SIZE'),
             default => throw new \InvalidArgumentException(sprintf('Un-supported texture size type: %s', $type->name))
         };
     }
-    /** @return array<array{w: int, h: int}> */
+    /** @return array<array-key, object{width: int, height: int}> */
     public static function SIZE_WITH_HD(ResponseTypeEnum $type = ResponseTypeEnum::SKIN): array
     {
         return match ($type) {
-            ResponseTypeEnum::SKIN => parent::SKIN_SIZE_HD,
-            ResponseTypeEnum::CAPE => parent::CAPE_SIZE_HD,
+            ResponseTypeEnum::SKIN => self::parseSizeEnvArray('SKIN_SIZE_HD'),
+            ResponseTypeEnum::CAPE => self::parseSizeEnvArray('CAPE_SIZE_HD'),
             default => throw new \InvalidArgumentException(sprintf('Un-supported texture size type: %s', $type->name))
         };
+    }
+    /**
+     * @param "SKIN_SIZE"|"CAPE_SIZE"|"SKIN_SIZE_HD"|"CAPE_SIZE_HD"
+     * @return array<array-key, object{width: int, height: int}>
+     */
+    public static function parseSizeEnvArray(string $env_name): array
+    {
+        // putenv('SKIN_SIZE=128,64|128,128|256,128|256');
+        try {
+            $ENV = getenv($env_name);
+            if ($ENV === false || empty($ENV)) new \RuntimeException("ENV $env_name empty");
+            return array_map(
+                fn(string $pair) =>
+                (object)array_combine(
+                    ['width', 'height'],
+                    array_map('intval', explode(',', $pair))
+                ),
+                explode('|', $ENV)
+            );
+        } catch (\ValueError | \RuntimeException) {
+            return array_map(fn(array $item) => (object) ['width' => $item[0], 'height' => $item[1]], self::{$env_name});
+        }
     }
     /** @throws TextureSizeException */
     public static function validateSize(int $width, int $height, ResponseTypeEnum $type = ResponseTypeEnum::SKIN): true
     {
         $valid_size = false;
         foreach (self::SIZE($type) as $value) {
-            if ($value['w'] == $width && $value['h'] == $height) {
+            if ($value->width == $width && $value->height == $height) {
                 $valid_size = true;
             }
         }
@@ -132,7 +180,7 @@ class Texture extends TextureConfig
     {
         $valid_size = false;
         foreach (self::SIZE_WITH_HD($type) as $value) {
-            if ($value['w'] == $width && $value['h'] == $height) {
+            if ($value->width == $width && $value->height == $height) {
                 $valid_size = true;
             }
         }

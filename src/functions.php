@@ -139,3 +139,18 @@ function convertToBytes(string $size): int
         default => (int) $size
     };
 }
+/**
+ * @throws \RuntimeException
+ * @throws \InvalidArgumentException
+ */
+function serializeEnvName(string $prefix, string $name): string
+{
+    if ($name === '') return $name;
+    // Add `_` before capital letters, but not in the middle of a group of capital letters
+    $name = preg_replace('/(?<!_)([A-Z])(?=[a-z]|\d|$)/', '_$1', $name);
+    if ($name === null) throw new \RuntimeException("Cannot serialize this env name: $name");
+    // Make sure there is `_` at the beginning
+    if ($name[0] !== '_') $name = '_' . $name;
+    \Microwin7\PHPUtils\Rules\Regex::valid_with_pattern($prefix, \Microwin7\PHPUtils\Rules\Regex::ENV_NAME);
+    return $prefix . strtoupper($name);
+}

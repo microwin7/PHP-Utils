@@ -22,6 +22,7 @@ class Regex
     public const string MD5 = self::UUID_NO_DASH;
     public const string SHA1 = '/^[0-9a-f]{40}$/';
     public const string SHA256 = '/^[0-9a-f]{64}$/';
+    public const string ENV_NAME = '/^([A-Z0-9\_]+)=(.*?)$/';
 
     /**
      * @throws \InvalidArgumentException
